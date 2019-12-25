@@ -4,7 +4,8 @@
   "description": "WafelbakBackend is an API created for the WafelbakApp project.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-local": "nodemon ./bin/www",
+    "start": "node ./bin/www"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "passport-local": "^1.0.0",
     "sequelize": "^5.21.3",
     "swagger-ui-express": "^4.1.2",
+    "tedious": "^6.6.5",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

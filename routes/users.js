@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var models  = require('../models')
+var User  = require('../models/User');
 let passport = require('passport');
 let jwt = require('express-jwt');
 let zxcvbn = require("zxcvbn");
@@ -10,7 +10,7 @@ let auth = jwt({ secret: process.env.WAFELBAK_BACKEND_SECRET });
 
 /* GET users listing. */
 router.get("/", function(req, res, next) {
-  let query = models.User.findAll({order: ['email']}); //TODO -salt -hash
+  let query = User.findAll({order: ['email']}); //TODO -salt -hash
   query.exec(function(err, users) {
     if (err) return next(err);
     res.json(users);
@@ -19,7 +19,7 @@ router.get("/", function(req, res, next) {
 
 /* GET user by id. */
 router.param("userId", function(req, res, next, id) {
-  let query = models.User.findByPK(id); //TODO -salt -hash
+  let query = User.findByPK(id); //TODO -salt -hash
   query.exec(function(err, user) {
     if (err) return next(err);
     if (!user) return next(new Error("not found " + id));
@@ -33,7 +33,7 @@ router.get("/id/:userId", function(req, res, next) {
 
 /* GET user by email. */
 router.param("email", function(req, res, next, email) {
-  let query = models.User.findOne({where: {email: email} }); //TODO -salt -hash
+  let query = User.findOne({where: {email: email} }); //TODO -salt -hash
   query.exec(function(err, user) {
     if (err) return next(err);
     if (!user) return next(new Error("No user found with email '" + email + "'."));
@@ -55,7 +55,7 @@ router.post("/isValidEmail", function(req, res, next) {
     if (req.body.email === req.body.oldEmail)
       res.send(true);
     else
-      models.User.findOne({where: {email: req.body.email.trim().toLowerCase() }}, function(err, result) {
+      User.findOne({where: {email: req.body.email.trim().toLowerCase() }}, function(err, result) {
         if (result.length)
           res.send(false);
         else
@@ -71,27 +71,28 @@ router.post("/register", function(req, res, next) {
     !req.body.firstName ||
     !req.body.lastName ||
     !req.body.birthday ||
-    !req.body.address               // TODO moet dit address.street, /streetNumber en /postalcode /city?
+    !req.body.street   ||           // TODO moet dit address.street, /streetNumber en /postalcode /city?
+    !req.body.streetNumber  ||
+    !req.body.streetExtra   ||
+    !req.body.postalCode    ||
+    !req.body.city 
   )
     return res.status(400).send("Gelieve alle velden in te vullen."); // TODO - i18n
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
     return res.status(400).send("Wachtwoord is niet sterk genoeg."); // TODO - i18n
 
-  //let user = new User();
-  let user = models.User.build({
+  let user = User.build({
     firstName: req.body.firstName.trim(),
     lastName: req.body.lastName.trim(),
     email: req.body.email.trim().toLowerCase(),
     birthday: req.body.birthday,
     admin: req.body.admin,
-    address: {
-        street: req.body.address.street,
-        streetNumber: req.body.address.streetNumber,
-        streetExtra: req.body.address.streetExtra,      // moet dit er uit en in if? wie weet of nullable? 
-        postalCode: req.body.address.postalCode,
-        city: req.body.address.city
-    }
+    street: req.body.street,
+    streetNumber: req.body.streetNumber,
+    streetExtra: req.body.streetExtra,      // moet dit er uit en in if? wie weet of nullable? 
+    postalCode: req.body.postalCode,
+    city: req.body.city
   });
   user.setPassword(req.body.password);
   user.save(function(err) {
@@ -132,16 +133,16 @@ router.patch("/id/:userId", auth, function(req, res, next) {
     user.birthday = req.body.birthday;
   if (req.body.admin)
     user.admin = req.body.admin;
-  if (req.body.address.street)
-    user.address.street = req.body.address.street;
-  if (req.body.address.streetNumber)
-    user.address.streetNumber = req.body.address.streetNumber;
-  if (req.body.address.streetExtra)
-    user.address.streetExtra = req.body.address.streetExtra;
-  if (req.body.address.postalCode)
-    user.address.postalCode = req.body.address.postalCode;
-  if (req.body.address.city)
-    user.address.city = req.body.address.city;
+  if (req.body.street)
+    user.street = req.body.street;
+  if (req.body.streetNumber)
+    user.streetNumber = req.body.streetNumber;
+  if (req.body.streetExtra)
+    user.streetExtra = req.body.streetExtra;
+  if (req.body.postalCode)
+    user.postalCode = req.body.postalCode;
+   if (req.body.city)
+     user.city = req.body.city;
   user.save(function(err) {
     if (err) return next(err);
     return res.json(user);

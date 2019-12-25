@@ -8,13 +8,11 @@ module.exports = (sequelize, DataTypes) => {
         email: {type: DataTypes.STRING, allowNull: false, unique: true},
         birthday: {type: DataTypes.DATE, allowNull: false},
         admin: {type: DataTypes.BOOLEAN, defaultValue: false},
-        address: {
-            street: {type: DataTypes.STRING, allowNull: false},
-            streetNumber: {type: DataTypes.INTEGER, allowNull: false},
-            streetExtra: {type: DataTypes.STRING},
-            postalCode: {type: DataTypes.STRING, allowNull: false},
-            city: {type: DataTypes.STRING, allowNull: false}
-        },
+        street: {type: DataTypes.STRING, allowNull: false},
+        streetNumber: {type: DataTypes.INTEGER, allowNull: false},
+        streetExtra: {type: DataTypes.STRING},
+        postalCode: {type: DataTypes.STRING, allowNull: false},
+        city: {type: DataTypes.STRING, allowNull: false},
         hash: {type: DataTypes.STRING},
         salt: {type: DataTypes.STRING},
         token: {type: DataTypes.STRING}
@@ -47,7 +45,11 @@ module.exports = (sequelize, DataTypes) => {
                 birthday: this.birthday,
                 admin: this.admin,
                 //picture: this.picture,
-                address: this.address,
+                street: this.street,
+                streetNumber: this.streetNumber,
+                streetExtra: this.streetExtra,
+                postalCode: this.postalCode,
+                city: this.city,
                 exp: exp.getTime() / 1000
             },
             process.env.WAFELBAK_BACKEND_SECRET

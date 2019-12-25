@@ -1,0 +1,250 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Kolveniershof API",
+      "description": "The official documentation of the kolveniershof API",
+      "version": "0.1"
+    },
+    "servers": [
+      {
+        "url": "https://kolv02-backend.herokuapp.com"
+      }
+    ],
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "tags": [
+      {
+        "name": "Users"
+      }
+    ],
+    "paths": {
+      "/API/users/register": {
+        "post": {
+          "tags": ["Users"],
+          "description": "Register new user",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/register"
+                },
+                "examples": {
+                  "0": {
+                    "value": "{\n    \"firstName\": \"NewClient\",\n    \"lastName\": \"ToDelete\",\n    \"email\": \"userToDelete@gmail.com\",\n    \"password\": \"test00##\",\n    \"birthday\": \"1999-01-01\"\n}"
+                  },
+                  "1": {
+                    "value": "{\r\n\t\"email\": \"mentor@gmail.com\",\r\n\t\"password\": \"test00##\",\r\n\t\"firstName\": \"Mentor\",\r\n\t\"lastName\": \"Test\",\r\n\t\"birthday\": \"2019-01-01T00:00:00.000Z\",\r\n\t\"admin\": true\r\n}"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "New user successfully registered",
+              "content": {
+                "application/json; charset=utf-8": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "examples": {}
+                }
+              }
+            },
+            "500": {
+              "description": "Wrong or missing argument",
+              "content": {
+                "application/json; charset=utf-8": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          },
+          "servers": [
+            {
+              "url": "https://kolv02-backend.herokuapp.com"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "https://kolv02-backend.herokuapp.com"
+          }
+        ]
+      },
+      "/API/users/login": {
+        "post": {
+          "tags": ["Users"],
+          "description": "Login as user or mentor",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/login"
+                },
+                "examples": {
+                  "0": {
+                    "value": "{\r\n\t\"email\": \"admin1@gmail.com\",\r\n\t\"password\": \"test00##\"\r\n}"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successfully logged in",
+              "content": {
+                "application/json; charset=utf-8": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          },
+          "servers": [
+            {
+              "url": "https://kolv02-backend.herokuapp.com"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "https://kolv02-backend.herokuapp.com"
+          }
+        ]
+      },
+      "/API/Users": {
+        "get": {
+          "tags": ["Users"],
+          "description": "Get all users",
+          "responses": {
+            "200": {
+              "description": "Return list of all users"
+            }
+          },
+          "servers": [
+            {
+              "url": "https://kolv02-backend.herokuapp.com"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "https://kolv02-backend.herokuapp.com"
+          }
+        ]
+      },
+      "/API/users/client10@gmail.com": {
+        "get": {
+          "tags": ["Users"],
+          "description": "Get user by email",
+          "responses": {
+            "200": {
+              "description": "Successfully returned user with corresponding email",
+              "content": {
+                "application/json; charset=utf-8": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          },
+          "servers": [
+            {
+              "url": "https://kolv02-backend.herokuapp.com"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "https://kolv02-backend.herokuapp.com"
+          }
+        ]
+      },
+      "/API/users/id/5dc4aafe926b0b7f22d9fa8e": {
+        "get": {
+          "tags": ["Users"],
+          "description": "Get user by ID",
+          "responses": {
+            "200": {
+              "description": "Successfully returned user with corresponding ID",
+              "content": {
+                "application/json; charset=utf-8": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "examples": {}
+                }
+              }
+            }
+          },
+          "servers": [
+            {
+              "url": "https://kolv02-backend.herokuapp.com"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "https://kolv02-backend.herokuapp.com"
+          }
+        ]
+      }
+    },
+    "components": {
+      "schemas": {
+        "login": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        },
+        "register": {
+          "type": "object",
+          "properties": {
+            "birthday": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
+            "admin": {
+              "type": "boolean"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  }
+  
