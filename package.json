@@ -1,0 +1,42 @@
+{
+  "name": "Wafelbak-Backend",
+  "version": "1.0.0",
+  "description": "WafelbakBackend is an API created for the WafelbakApp project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VictorOwnt/WafelbakBackend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VictorOwnt/WafelbakBackend/issues"
+  },
+  "homepage": "https://github.com/VictorOwnt/WafelbakBackend#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "email-validator": "^2.0.4",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
+    "express-sequelize": "0.0.4",
+    "http-errors": "^1.7.3",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.9.1",
+    "mysql2": "^2.1.0",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "sequelize": "^5.21.3",
+    "swagger-ui-express": "^4.1.2",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
