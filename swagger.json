@@ -33,10 +33,10 @@
                 },
                 "examples": {
                   "0": {
-                    "value": "{\r\n\t\"firstName\": \"NewClient\",\r\n\t\"lastName\": \"ToDelete\",\r\n\t\"email\": \"client@gmail.com\",\r\n\t\"password\": \"test00##\",\r\n\t\"birthday\": \"2019-12-27\",\r\n\t\"street\": \"Vroonstallestraat\",\r\n\t\"streetNumber\": 8,\r\n\t\"postalCode\": \"9032\",\r\n\t\"city\": \"Wondelgem\"\r\n}"
+                    "value": "{\r\n\t\"firstName\": \"NewClient\",\r\n\t\"lastName\": \"ToDelete\",\r\n\t\"email\": \"client@gmail.com\",\r\n\t\"password\": \"test00##\",\r\n\t\"birthday\": \"2019-12-27\",\r\n\t\"street\": \"Vroonstallestraat\",\r\n\t\"streetNumber\": 8,\r\n\t\"postalCode\": 9032,\r\n\t\"city\": \"Wondelgem\"\r\n}"
                   },
                   "1": {
-                    "value": "{\r\n\t\"firstName\": \"Victor\",\r\n\t\"lastName\": \"Van hulle\",\r\n\t\"email\": \"vanhulle.victor@gmail.com\",\r\n\t\"password\": \"123Victor!\",\r\n\t\"birthday\": \"1997-02-08\",\r\n\t\"street\": \"Woestijnegoedlaan\",\r\n\t\"streetNumber\": 38,\r\n\t\"postalCode\": \"9032\",\r\n\t\"city\": \"Wondelgem\",\r\n\t\"admin\": true\r\n}"
+                    "value": "{\r\n\t\"firstName\": \"Victor\",\r\n\t\"lastName\": \"Van hulle\",\r\n\t\"email\": \"vanhulle.victor@gmail.com\",\r\n\t\"password\": \"123Victor!\",\r\n\t\"birthday\": \"1997-02-08\",\r\n\t\"street\": \"Woestijnegoedlaan\",\r\n\t\"streetNumber\": 38,\r\n\t\"postalCode\": 9032,\r\n\t\"city\": \"Wondelgem\",\r\n\t\"admin\": true\r\n}"
                   }
                 }
               }

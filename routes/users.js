@@ -66,10 +66,10 @@ router.post("/isValidEmail", function(req, res, next) {
 router.post("/register", function(req, res, next) {
   // Check if all required fields are filled in
   if (
-    !req.body.email ||
-    !req.body.password ||
     !req.body.firstName ||
     !req.body.lastName ||
+    !req.body.email ||
+    !req.body.password ||
     !req.body.birthday ||
     !req.body.street   ||           // TODO moet dit address.street, /streetNumber en /postalcode /city?
     !req.body.streetNumber  ||

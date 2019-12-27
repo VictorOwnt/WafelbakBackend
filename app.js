@@ -12,7 +12,7 @@ const swaggerDocument = require('./swagger.json');
 require('dotenv').config();
 
 // SQL Server (online) || MySQL (local)
-var sequelize = new Sequelize(process.env.WAFELBAK_DATABASE || 'mysql://localhos:3306/WafelbakDatabase')
+var sequelize = new Sequelize('mysql://localhost:3306/WafelbakDatabase')
 /*var sequelize = new Sequelize('WafelbakDatabase', 'victorvh', '123Victor', { //@wafelbakserver
   host: 'wafelbakserver.database.windows.net:1433',
   dialect: 'mssql',

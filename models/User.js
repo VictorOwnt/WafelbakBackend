@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         street: {type: DataTypes.STRING, allowNull: false},
         streetNumber: {type: DataTypes.INTEGER, allowNull: false},
         streetExtra: {type: DataTypes.STRING},
-        postalCode: {type: DataTypes.STRING, allowNull: false},
+        postalCode: {type: DataTypes.INTEGER, allowNull: false},
         city: {type: DataTypes.STRING, allowNull: false},
         hash: {type: DataTypes.STRING},
         salt: {type: DataTypes.STRING},
