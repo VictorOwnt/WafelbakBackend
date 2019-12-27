@@ -41,7 +41,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 // Swagger endpoint
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/API', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // cors for cross origin requests
 let cors = require('cors');
