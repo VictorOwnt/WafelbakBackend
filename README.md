@@ -10,7 +10,7 @@ WafelbakBackend is an API created for the WafelbakApp project.
 4. Run "npm start" or "npm start-local"
 5. Browse to "localhost:3000"
 
-This API can also be viewed online on: https://wafelbak-backend.herokuapp.com/
+This API can also be viewed online on: https://wafelbak-backend.herokuapp.com/docs
 
 ## Contributors
 

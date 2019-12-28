@@ -1,15 +1,14 @@
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
-let User = require('../models/User');
+let models = require('../models');
 
 
 
 passport.use(
     new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, function(email, password, done) {
-        User.findOne({ email: email }, function(err, user) {
-            if (err) {
-                return done(err);
-            }
+        models.User.findOne({ where: {email: email }}).catch(err => {
+            return done(err);
+        }).then(function(user) {
             if (!user) {
                 return done(null, false, "Ongeldig emailadres."); // TODO - i18n
             }
