@@ -171,7 +171,7 @@ router.patch("/id/:userId", auth, function(req, res, next) {
 });
 
 /* DELETE user */ //TODO AANPASSEN
-router.delete("/id/:userId", auth, function (req, res, next) {
+router.delete("/delete/:userId", auth, function (req, res, next) {
   // Check permissions
   if (!req.user.admin) return res.status(401).end();
 

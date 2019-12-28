@@ -121,7 +121,7 @@
           }
         ]
       },
-      "/API/Users": {
+      "/API/users": {
         "get": {
           "tags": ["Users"],
           "description": "Get all users",
@@ -171,7 +171,7 @@
           }
         ]
       },
-      "/API/users/id/1": {
+      "/API/users/id/11": {
         "get": {
           "tags": ["Users"],
           "description": "Get user by ID",

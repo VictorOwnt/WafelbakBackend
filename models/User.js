@@ -55,11 +55,10 @@ module.exports = (sequelize, DataTypes) => {
             process.env.WAFELBAK_BACKEND_SECRET
         );
     };
-  
-    /* Voor mapping i guess
+    
     User.associate = function(models) {
-      models.User.hasMany(models.Task);
-    };*/
+      models.User.hasMany(models.Order);
+    };
   
     return User;
   };
