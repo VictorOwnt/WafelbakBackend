@@ -61,7 +61,7 @@ router.get("/joined", auth, function(req, res, next){
   if (!req.user.admin) return res.status(401).end();
 
   models.User.findAll({ include: {model: models.Order}, attributes: ['Orders.id', 'Orders.amountOfWaffles', 'Orders.desiredDeliveryTime', 'Orders.comment', 'Orders.UserId',
-  'lastName','street', 'streetNumber', 'streetExtra', 'postalCode', 'city']})
+  'firstName', 'lastName','street', 'streetNumber', 'streetExtra', 'postalCode', 'city']})
     .catch(err => {
       return next(err);
     }).then(function(query) {
