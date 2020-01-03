@@ -60,8 +60,8 @@ router.get("/joined", auth, function(req, res, next){
   // Check permissions
   if (!req.user.admin) return res.status(401).end();
 
-  models.User.findAll({ include: {model: models.Order}, attributes: ['Orders.id', 'Orders.amountOfWaffles', 'Orders.desiredDeliveryTime', 'Orders.comment', 'Orders.UserId',
-  'firstName', 'lastName','street', 'streetNumber', 'streetExtra', 'postalCode', 'city']})
+  models.Order.findAll({ include: {model: models.User}, attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId',
+  'User.firstName','User.lastName','User.street', 'User.streetNumber', 'User.streetExtra', 'User.postalCode', 'User.city']})
     .catch(err => {
       return next(err);
     }).then(function(query) {

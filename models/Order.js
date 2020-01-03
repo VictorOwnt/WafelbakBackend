@@ -9,5 +9,8 @@ module.exports = (sequelize, DataTypes) => {
         comment: {type: DataTypes.STRING}
     });
 
+    Order.associate = function(models) {
+        models.Order.belongsTo(models.User);
+      };
     return Order;
 };
