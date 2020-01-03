@@ -107,8 +107,17 @@ router.patch("/id/patch", auth, function(req, res, next) {
     .catch(err => {
       return next(err);
     }).then((order) => {
-          return res.json(order);
-      });
+          models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId'], where: {id: req.body.id}})
+          .catch(err => {
+            return next(err);
+          }).then(function(order) {
+            if(!order) {
+              return next(new Error("not found " + id));
+            } else {
+              return res.json(order)
+            }
+          });
+        });
 });
 
 /* DELETE order */ //TODO AANPASSEN
