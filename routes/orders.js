@@ -90,7 +90,7 @@ router.get("/byUserMail/:email", auth, function(req, res, next) {
 /* POST create Order. */
 router.post("/create", auth, function(req, res, next) {
     // Check if all required fields are filled in
-  if (!req.body.amountOfWaffles || /*!req.body.dateOrdered ||*/ !req.body.desiredDeliveryTime || !req.body.userid)
+  if (!req.body.amountOfWaffles || /*!req.body.dateOrdered ||*/ !req.body.desiredDeliveryTime /*|| !req.body.userid*/)
     return res.status(400).send("Gelieve alle noodzakelijke velden in te vullen."); // TODO - i18n
 
   let order = models.Order.build({
