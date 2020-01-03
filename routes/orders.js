@@ -100,19 +100,15 @@ router.post("/create", auth, function(req, res, next) {
 });
 
 /* UPDATE order */
-router.patch("/id/:orderId", auth, function(req, res, next) {
-    let order = receivedOrder;
-    if (req.body.amountOfWaffles)
-      order.amountOfWaffles = req.body.amountOfWaffles;
-    if (req.body.desiredDeliveryTime)
-      order.desiredDeliveryTime = req.body.desiredDeliveryTime;
-    if (req.body.comment)
-      order.comment = req.body.comment;
-    order.save(function(err){
-      if (err) return next(err);
-      return res.json(order);
-    })
-    
+router.patch("/id/patch", auth, function(req, res, next) {
+  let order = models.Order.update({ amountOfWaffles: req.body.amountOfWaffles, 
+    desiredDeliveryTime: req.body.desiredDeliveryTime, 
+    comment: req.body.comment}, {where: {id: req.body.id}})
+    .catch(err => {
+      return next(err);
+    }).then((order) => {
+          return res.json(order);
+      });
 });
 
 /* DELETE order */ //TODO AANPASSEN
