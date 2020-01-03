@@ -99,6 +99,22 @@ router.post("/create", auth, function(req, res, next) {
   });
 });
 
+/* UPDATE order */
+router.patch("/id/:orderId", auth, function(req, res, next) {
+    let order = receivedOrder;
+    if (req.body.amountOfWaffles)
+      order.amountOfWaffles = req.body.amountOfWaffles;
+    if (req.body.desiredDeliveryTime)
+      order.desiredDeliveryTime = req.body.desiredDeliveryTime;
+    if (req.body.comment)
+      order.comment = req.body.comment;
+    order.save(function(err){
+      if (err) return next(err);
+      return res.json(order);
+    })
+    
+});
+
 /* DELETE order */ //TODO AANPASSEN
 router.delete("/delete/:orderId", auth, function (req, res, next) {
     // Check permissions
