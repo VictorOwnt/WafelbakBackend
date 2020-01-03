@@ -100,13 +100,13 @@ router.post("/create", auth, function(req, res, next) {
 });
 
 /* UPDATE order */
-router.patch("/id/patch", auth, function(req, res, next) {
-  let order = models.Order.update({ amountOfWaffles: req.body.amountOfWaffles, 
+router.patch("/patch", auth, function(req, res, next) {
+  models.Order.update({ amountOfWaffles: req.body.amountOfWaffles, 
     desiredDeliveryTime: req.body.desiredDeliveryTime, 
     comment: req.body.comment}, {where: {id: req.body.id}})
     .catch(err => {
       return next(err);
-    }).then((order) => {
+    }).then(() => {
           models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId'], where: {id: req.body.id}})
           .catch(err => {
             return next(err);
@@ -120,13 +120,15 @@ router.patch("/id/patch", auth, function(req, res, next) {
         });
 });
 
-/* DELETE order */ //TODO AANPASSEN
-router.delete("/delete/:orderId", auth, function (req, res, next) {
-    // Check permissions
-    if (!req.user.admin) return res.status(401).end();
-  
-    res.status(501).send("Kan nog geen bestellingen verwijderen.");
-  });
+/* DELETE order */
+router.delete("/delete", auth, function (req, res, next) {
+  models.Order.destroy({where: {id: req.body.id}})
+    .catch(err => {
+      return next(err);
+    }).then(() => {
+      return res.json(req.body)
+    });
+});
   
 
 module.exports = router;
