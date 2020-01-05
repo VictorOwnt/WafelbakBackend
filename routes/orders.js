@@ -11,7 +11,7 @@ router.get("/", auth, function(req, res, next) {
     // Check permissions
     if (!req.user.admin) return res.status(401).end();
   
-    models.Order.findAll({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId']})
+    models.Order.findAll({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'status', 'UserId']})
     .catch(err => {
       return next(err);
     }).then(function(orders) {
@@ -21,7 +21,7 @@ router.get("/", auth, function(req, res, next) {
 
 /* GET order by id. */ //TODO authenticatie?
 router.param("orderId", function(req, res, next, id) {
-    models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId'], where: {id: id}})
+    models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'status', 'UserId'], where: {id: id}})
     .catch(err => {
       return next(err);
     }).then(function(order) {
@@ -37,9 +37,30 @@ router.param("orderId", function(req, res, next, id) {
     res.json(req.receivedOrder);
   });
 
+/* GET orders by status. */
+router.param("status", function(req, res, next, status) {
+  models.Order.findAll({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'status', 'UserId'], where: {status: status}})
+  .catch(err => {
+    return next(err);
+  }).then(function(orders) {
+    if(orders.length === 0) {
+      return next(new Error("No orders found with status" + status + "."));
+    } else {
+      req.receivedOrders = orders;
+      return next();
+    }
+  })
+});
+router.get("/byStatus/:status", auth, function(req, res, next) {
+  // Check permissions
+  if (!req.user.admin) return res.status(401).end();
+
+  res.json(req.receivedOrders);
+});
+
 /* GET orders by userid. */ //TODO authenticatie?
 router.param("userid", function(req, res, next, userid) {
-    models.Order.findAll({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId'], where: {Userid: userid}})
+    models.Order.findAll({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'status', 'UserId'], where: {Userid: userid}})
     .catch(err => {
       return next(err);
     }).then(function(orders) {
@@ -60,7 +81,7 @@ router.get("/joined", auth, function(req, res, next){
   // Check permissions
   if (!req.user.admin) return res.status(401).end();
 
-  models.Order.findAll({ include: {model: models.User}, attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId',
+  models.Order.findAll({ include: {model: models.User}, attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'status', 'UserId',
   'User.firstName','User.lastName','User.street', 'User.streetNumber', 'User.streetExtra', 'User.postalCode', 'User.city']})
     .catch(err => {
       return next(err);
@@ -71,7 +92,7 @@ router.get("/joined", auth, function(req, res, next){
 
 /* GET orders by UserEmail. */ //TODO authenticatie?
 router.param("email", function(req, res, next, email) {
-    models.User.findAll({ include: {model: models.Order}, attributes: ['Orders.id', 'Orders.amountOfWaffles', 'Orders.desiredDeliveryTime', 'Orders.comment', 'Orders.UserId'], where: {email: email}})
+    models.User.findAll({ include: {model: models.Order}, attributes: ['Orders.id', 'Orders.amountOfWaffles', 'Orders.desiredDeliveryTime', 'Orders.comment', 'Orders.status', 'Orders.UserId'], where: {email: email}})
     .catch(err => {
       return next(err);
     }).then(function(orders) {

@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
         amountOfWaffles: {type: DataTypes.INTEGER, allowNull: false},
         // dateOrdered: {type: DataTypes.DATE, allowNull: false},
         desiredDeliveryTime: {type: DataTypes.STRING, allowNull: false},
-        comment: {type: DataTypes.STRING}
+        comment: {type: DataTypes.STRING},
+        status: {type: DataTypes.STRING, defaultValue:"Te Bezorgen"}
     });
 
     Order.associate = function(models) {
