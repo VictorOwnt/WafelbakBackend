@@ -1,4 +1,4 @@
-<p align="center"><img src="./backend_icon.svg" width="200px"/></p>
+<p align="center"><img src="./ic_launcher-web.png?raw=true" width="200px"/></p>
 
 <h1 align="center">Wafelbak API</h1>
 
