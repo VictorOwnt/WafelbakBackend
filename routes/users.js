@@ -141,32 +141,41 @@ router.post("/login", function(req, res, next) {
   })(req, res, next);
 });
 
-/* PATCH user */ //TODO AANPASSEN
-router.patch("/id/:userId", auth, function(req, res, next) {
-  let user = req.receivedUser;
-  if (req.body.firstName)
-    user.firstName = req.body.firstName;
-  if (req.body.lastName)
-    user.lastName = req.body.lastName;
-  if (req.body.email)
-    user.email = req.body.email;
-  if (req.body.birthday)
-    user.birthday = req.body.birthday;
-  if (req.body.admin)
-    user.admin = req.body.admin;
-  if (req.body.street)
-    user.street = req.body.street;
-  if (req.body.streetNumber)
-    user.streetNumber = req.body.streetNumber;
-  if (req.body.streetExtra)
-    user.streetExtra = req.body.streetExtra;
-  if (req.body.postalCode)
-    user.postalCode = req.body.postalCode;
-   if (req.body.city)
-     user.city = req.body.city;
-  user.save(function(err) {
-    if (err) return next(err);
-    return res.json(user);
+/* UPDATE user */
+router.patch("/editProfile", auth, function(req, res, next) {
+  if (
+    !req.body.firstName ||
+    !req.body.lastName ||
+    !req.body.email ||
+    !req.body.password ||
+    !req.body.birthday ||
+    !req.body.street   ||           // TODO moet dit address.street, /streetNumber en /postalcode /city?
+    !req.body.streetNumber  ||
+    !req.body.postalCode    ||
+    !req.body.city 
+  )
+    return res.status(400).send("Gelieve alle velden in te vullen."); // TODO - i18n
+  // Check if password is strong enough
+  if (zxcvbn(req.body.password).score < 2)
+    return res.status(400).send("Wachtwoord is niet sterk genoeg."); // TODO - i18n
+  
+    models.User.update({ firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email,
+    password: req.body.password, birthday: req.body.birthday, street: req.body.street, streetNumber: req.body.streetNumber,
+    streetExtra: req.body.streetExtra, postalCode: req.body.postalCode, city: req.body.city
+   }, {where: {id: req.body.id}})
+   .catch(err => {
+    return next(err);
+  }).then(() => {
+    models.User.findOne({ attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'admin', 'street', 'streetNumber', 'streetExtra', 'postalCode', 'city'], where: {id: req.body.id}})
+    .catch(err => {
+      return next(err);
+    }).then(function(user) {
+      if(!user) {
+        return next(new Error("not found " + id));
+      } else {
+        return res.json(user)
+      }
+    });
   });
 });
 

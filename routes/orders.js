@@ -98,7 +98,9 @@ router.post("/create", auth, function(req, res, next) {
     desiredDeliveryTime: req.body.desiredDeliveryTime.trim(),
     comment: req.body.comment
   });
-  models.User.findOne({where: {id: req.body.userid}}).catch(err => {
+  if(req.body.userid)
+  {
+    models.User.findOne({where: {id: req.body.userid}}).catch(err => {
       return next(err);
   }).then(function(user) {
     order.save().catch(err => {
@@ -111,6 +113,13 @@ router.post("/create", auth, function(req, res, next) {
         });
     });
   });
+  } else {
+    order.save().catch(err => {
+      return next(err);
+    }).then(() => {
+      return res.json(order);
+    });
+  }
 });
 
 /* UPDATE order */
