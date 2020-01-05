@@ -143,6 +143,28 @@ router.post("/create", auth, function(req, res, next) {
   }
 });
 
+/* COMPLETE Order */
+router.patch("/complete", auth, function(req, res, next) {
+  // Check permissions
+  if (!req.user.admin) return res.status(401).end();
+
+  models.Order.update({ status: req.body.status }, {where: {id: req.body.id}})
+  .catch(err => {
+    return next(err);
+  }).then(() => {
+        models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredDeliveryTime', 'comment', 'UserId'], where: {id: req.body.id}})
+        .catch(err => {
+          return next(err);
+        }).then(function(order) {
+          if(!order) {
+            return next(new Error("not found " + req.body.id));
+          } else {
+            return res.json(order)
+          }
+        });
+      });
+})
+
 /* UPDATE order */
 router.patch("/patch", auth, function(req, res, next) {
   models.Order.update({ amountOfWaffles: req.body.amountOfWaffles, 
