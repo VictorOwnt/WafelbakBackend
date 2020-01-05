@@ -69,7 +69,7 @@ Client:
 
 Admin:
 
-- Email: *`mentor@gmail.com`*
+- Email: *`admin@gmail.com`*
 - Password: *`test00##`*
 
 ### Trying routes with Insomnia
