@@ -168,7 +168,7 @@ router.patch("/editProfile", auth, function(req, res, next) {
       return next(err);
     }).then(function(user) {
       if(!user) {
-        return next(new Error("not found " + id));
+        return next(new Error("not found " + req.body.id));
       } else {
         return res.json(user)
       }

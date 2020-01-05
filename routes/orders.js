@@ -135,7 +135,7 @@ router.patch("/patch", auth, function(req, res, next) {
             return next(err);
           }).then(function(order) {
             if(!order) {
-              return next(new Error("not found " + id));
+              return next(new Error("not found " + req.body.id));
             } else {
               return res.json(order)
             }
