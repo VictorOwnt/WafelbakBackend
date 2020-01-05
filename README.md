@@ -14,7 +14,7 @@ This project is part of the [Native Apps I](https://bamaflexweb.hogent.be/BMFUID
 
 The server is currently hosted by [Heroku](https://www.heroku.com/) [![Website](https://img.shields.io/website?label=backend&logo=heroku&url=https%3A%2F%2Fwafelbak-backend.herokuapp.com%2Fdocs)](https://wafelbak-backend.herokuapp.com/docs).
 
-> ### [`https://kolv02-backend.herokuapp.com/docs`](https://wafelbak-backend.herokuapp.com/docs)
+> ### [`https://wafelbak-backend.herokuapp.com/docs`](https://wafelbak-backend.herokuapp.com/docs)
 
 [**Visit the documentation website**](https://wafelbak-backend.herokuapp.com/docs)
 
@@ -64,12 +64,12 @@ Use the login credentials stated below to test the project's functionality.
 
 Client:
 
-- Email: *`client@mail.com`*
+- Email: *`client@gmail.com`*
 - Password: *`test00##`*
 
-Supervisor:
+Admin:
 
-- Email: *`mentor@mail.com`*
+- Email: *`mentor@gmail.com`*
 - Password: *`test00##`*
 
 ### Trying routes with Insomnia
