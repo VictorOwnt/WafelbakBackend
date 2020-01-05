@@ -57,9 +57,6 @@ router.param("email", function(req, res, next, email) {
   })
 });
 router.get("/:email", auth, function(req, res, next) {
-  // Check permissions
-  if (!req.user.admin) return res.status(401).end();
-
   res.json(req.receivedUser);
 });
 
