@@ -3,16 +3,11 @@ let jwt = require('jsonwebtoken');
 
 module.exports = (sequelize, DataTypes) => {
     var User = sequelize.define('User', {
-        firstName: {type: DataTypes.STRING, allowNull: false},
-        lastName: {type: DataTypes.STRING, allowNull: false},
+        firstName: {type: DataTypes.STRING},
+        lastName: {type: DataTypes.STRING},
         email: {type: DataTypes.STRING, allowNull: false, unique: true},
-        birthday: {type: DataTypes.DATE, allowNull: false},
-        admin: {type: DataTypes.BOOLEAN, defaultValue: false},
-        street: {type: DataTypes.STRING, allowNull: false},
-        streetNumber: {type: DataTypes.INTEGER, allowNull: false},
-        streetExtra: {type: DataTypes.STRING},
-        postalCode: {type: DataTypes.INTEGER, allowNull: false},
-        city: {type: DataTypes.STRING, allowNull: false},
+        birthday: {type: DataTypes.DATE},
+        role: {type: DataTypes.ENUM("admin", "user", "member"), allowNull: false, defaultValue: "user"},
         hash: {type: DataTypes.STRING},
         salt: {type: DataTypes.STRING},
         token: {type: DataTypes.STRING}
@@ -42,14 +37,8 @@ module.exports = (sequelize, DataTypes) => {
                 firstName: this.firstName,
                 lastName: this.lastName,
                 email: this.email,
+                role: this.role,
                 birthday: this.birthday,
-                admin: this.admin,
-                //picture: this.picture,
-                street: this.street,
-                streetNumber: this.streetNumber,
-                streetExtra: this.streetExtra,
-                postalCode: this.postalCode,
-                city: this.city,
                 exp: exp.getTime() / 1000
             },
             process.env.WAFELBAK_BACKEND_SECRET
@@ -57,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     
     User.associate = function(models) {
-      models.User.hasMany(models.Order);
+      models.User.hasOne(models.Address);
     };
   
     return User;

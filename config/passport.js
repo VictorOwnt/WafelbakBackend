@@ -2,8 +2,6 @@ let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
 let models = require('../models');
 
-
-
 passport.use(
     new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, function(email, password, done) {
         models.User.findOne({ where: {email: email }}).catch(err => {
