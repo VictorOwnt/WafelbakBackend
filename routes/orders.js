@@ -115,6 +115,10 @@ router.get("/byUserMail/:email", auth, function(req, res, next) {
 });
 
 //TODO
+  // CREATE ORDER ==> order met dropdownlijst van straat
+  // straten worden appart gemaakt, dus findone op street 
+  // voor de straat van de order
+  //order.save.then.user.addorder 
 /* POST create Order. */
 router.post("/create", auth, function(req, res, next) {
     // Check if all required fields are filled in

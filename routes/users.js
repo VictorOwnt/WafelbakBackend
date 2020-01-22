@@ -120,6 +120,7 @@ router.post("/isValidEmail", function(req, res, next) {
       res.send(validator.validate(req.body.email.trim().toLowerCase()));
     });
 });
+
 //TODO REGISTER USER
 router.post("/register", function(req, res, next) {
   // Check if all required fields are filled in
@@ -138,7 +139,8 @@ router.post("/register", function(req, res, next) {
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
     return res.status(400).send("Wachtwoord is niet sterk genoeg.");
-
+  
+  // Creating new User
   let user = models.User.build({
     firstName: req.body.firstName.trim(),
     lastName: req.body.lastName.trim(),
@@ -146,39 +148,235 @@ router.post("/register", function(req, res, next) {
     birthday: req.body.birthday,
     role: req.body.role
   });
-  //Add new city? drop down lijst met reedsbestaande? 
-  // gewoon find en klaar ermee?
+
+  function doesCityExist(cityName) {
+    return models.City.count({where: {cityName: cityName}}).catch(err => {
+      return next(err);
+    }).then(count => {
+      if(count == 0) {
+        return false
+      } else {
+        return true
+      }
+    });
+  }
+
+  //Creating City
   let userCity = models.City.build({
     cityName: req.body.cityName,
     postalCode: req.body.postalCode
-  })
+  });
+
+  function doesStreetExist(streetName) {
+    return models.Street.count({where: {streetName: streetName}}).catch(err => {
+      return next(err);
+    }).then(count => {
+      if(count == 0) {
+        return false
+      } else {
+        return true
+      }
+    });
+  }
+ 
+  //Creating Street
   let userStreet = models.Street.build({
-    streetName: req.body.streetName.trim(),
-  })
+    streetName: req.body.streetName
+  });
+
+  //Creating new Address
   let userAddress = models.Address.build({
     streetNumber: req.body.streetNumber,
-    streetExtra: req.body.streetExtra,
+    streetExtra: req.body.streetExtra
   });
-/*
+
+  //Saving the whole thing into database
   user.setPassword(req.body.password);
-  user.save().catch(err => {
-    return next(err);
-  }).then(() => {
-    user.setAddress(userAddress).catch(err => {
-      return next(err);
-    }).then(() => {
-      userCity.addStreet(userStreet).catch(err => {
+  doesCityExist(req.body.cityName).then(exists => {
+     if(exists) {
+      models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
         return next(err);
+      }).then(function(city) {
+        userCity = city;
       }).then(() => {
-        userAddress.setStreet(userStreet).catch(err => {
-          return next;
+        userCity.update().catch(err => {
+          return next(err);
+        })
+      }).then(() => {
+        doesStreetExist(req.body.streetName).then(exists => {
+          if(exists) {
+            models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
+              return next(err);
+            }).then(function(street) {
+              userStreet = street;
+            }).then(() => {
+              userStreet.update().catch(err => {
+                return next(err);
+              });
+            }).then(() => {
+              userStreet.setCity(userCity).catch(err => {
+                return next(err);
+              });
+            }).then(() => {//TODO alles van address klop niet
+              userAddress.save().catch(err => {
+                return next(err);
+              }).then(() => {
+                userAddress.setStreet(userStreet);
+              });
+            });
+          } else {
+            userStreet.save().catch(err => {
+              return next(err);
+            }).then(() => {
+              userStreet.setCity(userCity).catch(err => {
+                return next(err);
+              });
+            }).then(() => {//TODO alles van address klop niet
+              userAddress.save().catch(err => {
+                return next(err);
+              }).then(() => {
+                userAddress.setStreet(userStreet);
+              })
+            });
+          }
+        })}).then(() => {
+        user.save().catch(err => {
+          return next(err);
+        }).then(() => {
+          user.setAddress(userAddress).catch(err => {
+            return next(err);
+          });
         }).then(() => {
           user.token = user.generateJWT();
           return res.json(user);
         });
       });
+     } else {
+      userCity.save().catch(err => {
+        return next(err);
+      }).then(() => {
+        doesStreetExist(req.body.streetName).then(exists => {
+          if(exists) {
+            models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
+              return next(err);
+            }).then(function(street) {
+              userStreet = street;
+            }).then(() => {
+              userStreet.update().catch(err => {
+                return next(err);
+              });
+            }).then(() => {
+                userStreet.setCity(userCity).catch(err => {
+                return next(err);
+              });
+          }).then(() => {//TODO alles van address klop niet
+            userAddress.save().catch(err => {
+              return next(err);
+            }).then(() => {
+              userAddress.setStreet(userStreet);
+            });
+          });
+          } else {
+            userStreet.save().catch(err => {
+              return next(err);
+            }).then(() => { 
+              userStreet.setCity(userCity).catch(err => {
+                return next(err);
+              }); //TODO alles van address klop niet
+            }).then(() => {
+              userAddress.save().catch(err => {
+                return next(err);
+              }).then(() => {
+                userAddress.setStreet(userStreet);
+              })
+            });
+          }
+        })}).then(() => {
+        user.save().catch(err => {
+          return next(err);
+        }).then(() => {
+          user.setAddress(userAddress).catch(err => {
+            return next(err);
+          });
+        }).then(() => {
+          user.token = user.generateJWT();
+          return res.json(user);
+        });
+      });
+     }
+  });
+  //TODO hieronder werkt!, enkel voor stad
+  /*if(exists) {
+    models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
+      return next(err);
+    }).then(function(city) {
+      userCity = city;
+    }).then(() => {
+      userCity.update().catch(err => {
+        return next(err);
+      })
+    }).then(() => {
+      models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
+        return next(err);
+      }).then(function(street) {
+        userStreet = street;
+      }).then(() => {
+        userStreet.update().catch(err => {
+          return next(err);
+        })
+      }).then(() => {
+        userStreet.setCity(userCity).catch(err => {
+          return next(err);
+      });
     });
-  });*/
+  }).then(() => {
+      userAddress.save().catch(err => {
+        return next(err);
+      }).then(() => {
+        userAddress.setStreet(userStreet)
+      });
+    }).then(() => {
+      user.save().catch(err => {
+        return next(err);
+      }).then(() => {
+        user.setAddress(userAddress).catch(err => {
+          return next(err);
+        });
+      }).then(() => {
+        user.token = user.generateJWT();
+        return res.json(user);
+      });
+    });
+  } else {
+  userCity.save().catch(err => {
+    return next(err);
+  }).then(() => {
+    userStreet.save().catch(err => {
+      return next(err);
+    }).then(() => {
+      userStreet.setCity(userCity).catch(err => {
+        return next(err);
+      });
+    });
+  }).then(() => {
+    userAddress.save().catch(err => {
+      return next(err);
+    }).then(() => {
+      userAddress.setStreet(userStreet)
+    });
+  }).then(() => {
+    user.save().catch(err => {
+      return next(err);
+    }).then(() => {
+      user.setAddress(userAddress).catch(err => {
+        return next(err);
+      });
+    }).then(() => {
+      user.token = user.generateJWT();
+      return res.json(user);
+    });
+  });
+  }*/
 });
 
 // REGISTER MEMBER

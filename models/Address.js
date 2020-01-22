@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Address.associate = function(models) {
-        models.Address.hasOne(models.Street);
+        models.Address.belongsTo(models.Street);
       };
     return Address;
 };
