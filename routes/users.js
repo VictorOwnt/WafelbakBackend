@@ -191,107 +191,77 @@ router.post("/register", function(req, res, next) {
   });
 
   //Saving the whole thing into database
+  //TODO mogelijke duplicate code weg
   user.setPassword(req.body.password);
   doesCityExist(req.body.cityName).then(exists => {
      if(exists) {
-      models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
-        return next(err);
-      }).then(function(city) {
-        userCity = city;
-      }).then(() => {
-        userCity.update().catch(err => {
-          return next(err);
-        })
-      }).then(() => {
-        doesStreetExist(req.body.streetName).then(exists => {
-          if(exists) {
-            models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
-              return next(err);
-            }).then(function(street) {
-              userStreet = street;
-            }).then(() => {
-              userStreet.update().catch(err => {
-                return next(err);
-              });
-            }).then(() => {
-              userStreet.setCity(userCity).catch(err => {
-                return next(err);
-              });
-            }).then(() => {//TODO alles van address klop niet
-              userAddress.save().catch(err => {
-                return next(err);
-              }).then(() => {
-                userAddress.setStreet(userStreet);
-              });
-            });
-          } else {
+       models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
+         return next(err);
+       }).then(function(city) {
+         userCity = city;
+       }).then(() => {
+         doesStreetExist(req.body.streetName).then(exists => {
+           if(exists) {
+             models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
+               return next(err);
+             }).then(function(street) {
+               userStreet = street;
+             }).then(() => {
+               userAddress.setStreet(userStreet);
+             }).then(() => {
+               user.save().catch(err => {
+                 return next(err);
+               }).then(() => {
+                 user.setAddress(userAddress).catch(err => {
+                   return next(err);
+                 });
+               }).then(() => {
+                 user.token = user.generateJWT();
+                 return res.json(user);
+               });
+             });
+           } else {
             userStreet.save().catch(err => {
               return next(err);
             }).then(() => {
               userStreet.setCity(userCity).catch(err => {
                 return next(err);
               });
-            }).then(() => {//TODO alles van address klop niet
-              userAddress.save().catch(err => {
+            }).then(() => {
+              userAddress.setStreet(userStreet);
+            }).then(() => {
+              user.save().catch(err => {
                 return next(err);
               }).then(() => {
-                userAddress.setStreet(userStreet);
-              })
+                user.setAddress(userAddress).catch(err => {
+                  return next(err);
+                });
+              }).then(() => {
+                user.token = user.generateJWT();
+                return res.json(user);
+              });
             });
-          }
-        })}).then(() => {
-        user.save().catch(err => {
-          return next(err);
-        }).then(() => {
-          user.setAddress(userAddress).catch(err => {
-            return next(err);
-          });
-        }).then(() => {
-          user.token = user.generateJWT();
-          return res.json(user);
-        });
-      });
-     } else {
+           }
+         });
+       });
+      } else { //als stad niet bestaat bestaat straat sws ook niet
       userCity.save().catch(err => {
         return next(err);
       }).then(() => {
-        doesStreetExist(req.body.streetName).then(exists => {
-          if(exists) {
-            models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
-              return next(err);
-            }).then(function(street) {
-              userStreet = street;
-            }).then(() => {
-              userStreet.update().catch(err => {
-                return next(err);
-              });
-            }).then(() => {
-                userStreet.setCity(userCity).catch(err => {
-                return next(err);
-              });
-          }).then(() => {//TODO alles van address klop niet
-            userAddress.save().catch(err => {
-              return next(err);
-            }).then(() => {
-              userAddress.setStreet(userStreet);
-            });
+        userStreet.save().catch(err => {
+          return next(err);
+        }).then(() => { 
+          userStreet.setCity(userCity).catch(err => {
+            return next(err);
           });
-          } else {
-            userStreet.save().catch(err => {
-              return next(err);
-            }).then(() => { 
-              userStreet.setCity(userCity).catch(err => {
-                return next(err);
-              }); //TODO alles van address klop niet
-            }).then(() => {
-              userAddress.save().catch(err => {
-                return next(err);
-              }).then(() => {
-                userAddress.setStreet(userStreet);
-              })
-            });
-          }
-        })}).then(() => {
+        }).then(() => {
+          userAddress.save().catch(err => {
+            return next(err);
+          }).then(() => {
+            userAddress.setStreet(userStreet);
+          });
+        })
+      }).then(() => { 
         user.save().catch(err => {
           return next(err);
         }).then(() => {
@@ -305,78 +275,6 @@ router.post("/register", function(req, res, next) {
       });
      }
   });
-  //TODO hieronder werkt!, enkel voor stad
-  /*if(exists) {
-    models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
-      return next(err);
-    }).then(function(city) {
-      userCity = city;
-    }).then(() => {
-      userCity.update().catch(err => {
-        return next(err);
-      })
-    }).then(() => {
-      models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
-        return next(err);
-      }).then(function(street) {
-        userStreet = street;
-      }).then(() => {
-        userStreet.update().catch(err => {
-          return next(err);
-        })
-      }).then(() => {
-        userStreet.setCity(userCity).catch(err => {
-          return next(err);
-      });
-    });
-  }).then(() => {
-      userAddress.save().catch(err => {
-        return next(err);
-      }).then(() => {
-        userAddress.setStreet(userStreet)
-      });
-    }).then(() => {
-      user.save().catch(err => {
-        return next(err);
-      }).then(() => {
-        user.setAddress(userAddress).catch(err => {
-          return next(err);
-        });
-      }).then(() => {
-        user.token = user.generateJWT();
-        return res.json(user);
-      });
-    });
-  } else {
-  userCity.save().catch(err => {
-    return next(err);
-  }).then(() => {
-    userStreet.save().catch(err => {
-      return next(err);
-    }).then(() => {
-      userStreet.setCity(userCity).catch(err => {
-        return next(err);
-      });
-    });
-  }).then(() => {
-    userAddress.save().catch(err => {
-      return next(err);
-    }).then(() => {
-      userAddress.setStreet(userStreet)
-    });
-  }).then(() => {
-    user.save().catch(err => {
-      return next(err);
-    }).then(() => {
-      user.setAddress(userAddress).catch(err => {
-        return next(err);
-      });
-    }).then(() => {
-      user.token = user.generateJWT();
-      return res.json(user);
-    });
-  });
-  }*/
 });
 
 // REGISTER MEMBER
