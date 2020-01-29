@@ -4,7 +4,6 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Street.associate = function(models) {
-        //models.Street.hasMany(models.Address);
         models.Street.belongsTo(models.City);
         models.Street.belongsTo(models.Zone);
       };

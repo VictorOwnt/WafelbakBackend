@@ -259,18 +259,18 @@ router.post("/register", function(req, res, next) {
             return next(err);
           }).then(() => {
             userAddress.setStreet(userStreet);
+          }).then(() => {
+            user.save().catch(err => {
+              return next(err);
+            }).then(() => {
+              user.setAddress(userAddress).catch(err => {
+                return next(err);
+              });
+            }).then(() => {
+              user.token = user.generateJWT();
+              return res.json(user);
+            });
           });
-        })
-      }).then(() => { 
-        user.save().catch(err => {
-          return next(err);
-        }).then(() => {
-          user.setAddress(userAddress).catch(err => {
-            return next(err);
-          });
-        }).then(() => {
-          user.token = user.generateJWT();
-          return res.json(user);
         });
       });
      }

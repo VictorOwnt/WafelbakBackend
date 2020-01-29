@@ -136,14 +136,41 @@ router.post("/create", auth, function(req, res, next) {
     desiredOrderTime: req.body.desiredOrderTime.trim(),
     comment: req.body.comment
   });
+ /* TODO in deze stijl
+  let orderAddress = models.Address.build({
+    streetNumber: req.body.streetNumber,
+    streetExtra: req.body.streetExtra
+  })
 
+  let orderStreet = models.Street.build({
+    streetName: req.body.streetName
+  })
+
+  models.Address.findOrCreate({
+    where: {streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra},
+    include: {model: models.Street}
+  }).catch(err => {
+      return next(err);
+  }).then(function(address) {
+      orderAddress = address;
+  }).then(() => {
+    models.Street.findOrCreate({
+      where: {streetName: req.body.streetName}
+    }).catch(err => {
+      return next(err);
+    }).then(function(street) {
+      orderStreet = street; 
+    })
+  });
+
+  orderAddress.setStreet(orderStreet);
   order.save().catch(err => {
     return next(err);
   }).then(() => {
-    
+    order.setAddress(orderAddress)
   }).then(() => {
     return res.json(order);
-  });
+  });*/
 });
 
 //TODO

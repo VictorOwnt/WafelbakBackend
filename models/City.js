@@ -4,9 +4,5 @@ module.exports = (sequelize, DataTypes) => {
         postalCode: {type: DataTypes.INTEGER, allowNull: false}
     });
 
-    /* 
-    City.associate = function(models) {
-        models.City.hasMany(models.Street);
-      };*/
     return City;
 };
