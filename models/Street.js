@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     var Street = sequelize.define('Street', {
-        streetName: {type: DataTypes.STRING, allowNull: false/*, unique: true */}
+        streetName: {type: DataTypes.STRING, allowNull: false, unique: true }
     });
 
     Street.associate = function(models) {

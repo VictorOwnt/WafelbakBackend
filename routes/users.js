@@ -121,7 +121,7 @@ router.post("/isValidEmail", function(req, res, next) {
     });
 });
 
-//TODO REGISTER USER
+// REGISTER USER
 router.post("/register", function(req, res, next) {
   // Check if all required fields are filled in
   if (
