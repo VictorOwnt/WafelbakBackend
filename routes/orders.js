@@ -208,49 +208,81 @@ router.post("/create", auth, function(req, res, next) {
   })
 });
 
-//TODO
 /* COMPLETE Order */
-router.patch("/complete", auth, function(req, res, next) {
-  // Check permissions
-  if (req.user.role != "admin") return res.status(401).end();
-
-  models.Order.update({ status: req.body.status }, {where: {id: req.body.id}})
+router.param("orderId", function(req, res, next, id) {
+  models.Order.update({ status: req.body.status }, {where: {id: id}})
   .catch(err => {
     return next(err);
   }).then(() => {
-        models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredOrderTime', 'comment', 'UserId'], where: {id: req.body.id}})
+    models.Order.findOne({ include: [{
+      model: models.Address,
+      include: [{
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
+      }],
+    attributes: ['streetNumber', 'streetExtra']
+  }], 
+  attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+  where: {id: id} })
         .catch(err => {
           return next(err);
         }).then(function(order) {
           if(!order) {
             return next(new Error("not found " + req.body.id));
           } else {
-            return res.json(order)
+            req.receivedOrder = order;
+            return next();
           }
         });
       });
+});
+router.patch("/complete/:orderId", auth, function(req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+  res.json(req.receivedOrder);
 })
 
 //TODO
-/* UPDATE order */
-router.patch("/patch", auth, function(req, res, next) {
-  models.Order.update({ amountOfWaffles: req.body.amountOfWaffles, 
+/* UPDATE order */ //streetNumber, streetName, streetExtra, cityName, postalCode
+router.param("orderId", function(req, res, next, id) {
+  models.Order.update({ name: req.body.name, amountOfWaffles: req.body.amountOfWaffles, 
     desiredOrderTime: req.body.desiredOrderTime, 
-    comment: req.body.comment}, {where: {id: req.body.id}})
+    comment: req.body.comment}, {where: {id: id}})
     .catch(err => {
       return next(err);
     }).then(() => {
-          models.Order.findOne({ attributes: ['id', 'amountOfWaffles', 'desiredOrderTime', 'comment', 'UserId'], where: {id: req.body.id}})
+      models.Order.findOne({ include: [{
+        model: models.Address,
+        include: [{
+          model: models.Street,
+          include: [{
+            model: models.City,
+            attributes: ['cityName', 'postalCode']
+          }],
+          attributes: ['streetName']
+        }],
+      attributes: ['streetNumber', 'streetExtra']
+    }], 
+    attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+    where: {id: id} })
           .catch(err => {
             return next(err);
           }).then(function(order) {
             if(!order) {
               return next(new Error("not found " + req.body.id));
             } else {
-              return res.json(order)
+              req.receivedOrder = order;
+              return next();
             }
           });
         });
+});
+router.patch("/patch/:orderId", auth, function(req, res, next) {
+    res.json(req.receivedOrder);
 });
 
 //TODO
