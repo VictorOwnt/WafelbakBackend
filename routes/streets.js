@@ -101,7 +101,7 @@ router.get("/byCity/:cityName", auth, function(req, res, next) {
     res.json(req.receivedStreets);
 });
 
-/* GET streets by zone. */ //TODO authenticatie?
+/* GET streets by zone. */ //TODO authenticatie? + eventuele verplaatsing naar zones router?
 router.param("zoneName", function(req, res, next, zoneName) {
   models.Street.findAll({ include: [{
     model: models.City,
@@ -188,9 +188,42 @@ router.post("/create", auth, function(req, res, next) {
   })
 });
 
-//TODO update? is dit noodzakelijk? wel nog nodig ==> toekennen straat aan zone
+/* PATCH set Zones */ //TODO eventuele verplaatsing naar zones router?
+//sets zone for multiple (or one) street
+router.patch("/setZone", auth, function(req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
 
-/* DELETE street */ 
+  models.Zone.findOne({where: {zoneName: req.body.zoneName}}).catch(err => {
+    return next(err);
+  }).then(function(zone){
+    models.Street.update({ZoneId: zone.id}, {where: {streetName: req.body.streetNames}}).catch(err => {
+      return next(err);
+    }).then(() => {
+      models.Street.findAll({ include: [{
+        model: models.City,
+      attributes: ['cityName', 'postalCode']
+    }, {
+        model: models.Zone,
+      attributes: ['zoneName']
+    }], attributes: ['id', 'streetName'],
+    where: {streetName: req.body.streetNames}}).catch(err => {
+      return next(err);
+    }).then(function(streets) {
+      if(!streets) {
+        return next(new Error("No streets found with name" + name + "."));
+      } else {
+        res.json(streets);
+      }
+      });
+    });
+  });
+});
+
+//TODO is een update street nodig?
+
+/* DELETE street */ //misschien deze weghalen, is gevaarlijk, kan gans systeem omzeep helpen
+//TODO superadmin (aka ik kan dit enekel aanhalen)
 router.param("dStreetId", function(req, res, next, id) {
   models.Street.destroy({where: {id: id}})
   .catch(err => {
@@ -201,6 +234,7 @@ router.param("dStreetId", function(req, res, next, id) {
     });
 });
 router.delete("/delete/:dStreetId", auth, function (req, res, next) {
+  if (req.user.role != "admin") return res.status(401).end();
     res.json(true);
 });
   
