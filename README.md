@@ -2,7 +2,7 @@
 
 <h1 align="center">Wafelbak API</h1>
 
-The 'Wafelbak' Android application is an application made to facilitate the process of ordering waffles for the benefit of ([Scouts Wondelgem](http://www.scoutswondelgem.be)).
+The 'Wafelbak' Web and Android applications are applications made to facilitate the process of ordering waffles for the benefit of ([Scouts Wondelgem](http://www.scoutswondelgem.be)).
 
 This is a RESTful API for the applications.
 
