@@ -75,11 +75,13 @@ Admin:
 We've included our [Insomnia](https://insomnia.rest/) configuration file for testing API calls. No automated end-to-end tests (yet).
 
 You can find a guide on how to import this [here](https://support.insomnia.rest/article/52-importing-and-exporting-data). The data is located in the `Insomnia_2020_01_05.json` file.
-
+<!--
 ### Azure SQL Database
-
+-->
+<!--
 This API relies on a [Microsoft Azure](azure.microsoft.com) database.
-
+-->
+<!--
 1. Create a new file `.env` in the root folder of the project
 2. Open the file and add following lines to it:
 
@@ -90,9 +92,9 @@ This API relies on a [Microsoft Azure](azure.microsoft.com) database.
     DATABASE_PASSWORD="123Victor"
     DATABASE_SERVER="wafelbakserver.database.windows.net"
     DATABASE_DIALECT="mssql"
-    ```
-
-3. It is now possible to test the API with our database. **Don't abuse this.** Change the values to your own values when deploying.
+    ```-->
+<!--
+3. It is now possible to test the API with our database. **Don't abuse this.** Change the values to your own values when deploying. -->
 
 ## Built With
 
