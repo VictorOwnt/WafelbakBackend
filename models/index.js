@@ -9,10 +9,7 @@ var sequelize = new Sequelize(process.env.WAFELBAK_DATABASE, process.env.DATABAS
   host: process.env.DATABASE_SERVER,
   dialect: process.env.DATABASE_DIALECT,
   dialectOptions: {
-      options: {
-          encrypt: true,
-          requestTimeout: 30000
-      }
+    connectTimeout: 30000
   }
 });
 
