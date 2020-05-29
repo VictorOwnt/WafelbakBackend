@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var models  = require('../models');
-let jwt = require('express-jwt');
+const express = require('express');
+const router = express.Router();
+const models  = require('../models');
+const jwt = require('express-jwt');
 
-let auth = jwt({ secret: process.env.WAFELBAK_BACKEND_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
 
 /* GET zones listing. */
 router.get("/", auth, function(req, res, next) {

@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var models  = require('../models');
-let passport = require('passport');
-let jwt = require('express-jwt');
-let zxcvbn = require("zxcvbn");
-let validator = require('email-validator');
+const express = require('express');
+const router = express.Router();
+const models  = require('../models');
+const passport = require('passport');
+const jwt = require('express-jwt');
+const zxcvbn = require("zxcvbn");
+const validator = require('email-validator');
 
-let auth = jwt({ secret: process.env.WAFELBAK_BACKEND_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
 
 /* GET users listing. */
 router.get("/", auth, function(req, res, next) {

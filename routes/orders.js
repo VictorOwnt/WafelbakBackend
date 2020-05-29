@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var models  = require('../models');
-let jwt = require('express-jwt');
-var Sequelize = require('sequelize');
-var Op = Sequelize.Op;
+const express = require('express');
+const router = express.Router();
+const models  = require('../models');
+const jwt = require('express-jwt');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 
-let auth = jwt({ secret: process.env.WAFELBAK_BACKEND_SECRET });
+let auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
 
 
 /* GET orders listing. */       //TODO enkel orders voor bepaald jaar?

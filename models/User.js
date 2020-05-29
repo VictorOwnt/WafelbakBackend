@@ -1,5 +1,5 @@
-let crypto = require('crypto');
-let jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 module.exports = (sequelize, DataTypes) => {
     var User = sequelize.define('User', {
@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
                 birthday: this.birthday,
                 exp: exp.getTime() / 1000
             },
-            process.env.WAFELBAK_BACKEND_SECRET
+            process.env.WAFELBAK_API_SECRET
         );
     };
     
