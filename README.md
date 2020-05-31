@@ -10,11 +10,11 @@ This is a RESTful API for the applications.
 
 ## Getting Started
 
-The server is currently hosted by [Heroku](https://www.heroku.com/) [![Website](https://img.shields.io/website?label=backend&logo=heroku&url=https%3A%2F%2Fwafelbak-backend.herokuapp.com%2Fdocs)](https://wafelbak-backend.herokuapp.com/docs).
+The server is currently hosted by [Google Cloud](https://cloud.google.com) [![Website](https://img.shields.io/website?label=backend&logo=google%20cloud&url=https%3A%2F%2Fwafelbak-api-p4tlzt4yxq-ew.a.run.app%2Fdocs)](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs).
 
-> ### [`https://wafelbak-backend.herokuapp.com/docs`](https://wafelbak-backend.herokuapp.com/docs)
+> ### [`hhttps://wafelbak-api-p4tlzt4yxq-ew.a.run.app/API/docs`](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs)
 
-[**Visit the documentation website**](https://wafelbak-backend.herokuapp.com/docs)
+[**Visit the documentation website**](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs)
 
 ### Installation
 
@@ -69,12 +69,14 @@ Admin:
 
 - Email: *`admin@gmail.com`*
 - Password: *`test00##`*
-
+<!--
 ### Trying routes with Insomnia
-
-We've included our [Insomnia](https://insomnia.rest/) configuration file for testing API calls. No automated end-to-end tests (yet).
-
+-->
+<!--
+We've included our [Insomnia](https://insomnia.rest/) configuration file for testing API calls. No automated end-to-end tests (yet).-->
+<!--
 You can find a guide on how to import this [here](https://support.insomnia.rest/article/52-importing-and-exporting-data). The data is located in the `Insomnia_2020_01_05.json` file.
+-->
 <!--
 ### Azure SQL Database
 -->
