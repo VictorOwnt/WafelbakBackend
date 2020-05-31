@@ -4,8 +4,37 @@ const models  = require('../models');
 const jwt = require('express-jwt');
 
 const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+/**
+ * @swagger
+ * tags:
+ *   name: Zones
+ *   description: Zone management
+ */
 
-/* GET zones listing. */
+/** GET zones listing.
+ * @swagger
+ * /API/zones:
+ *    get:
+ *      tags: [Zones]
+ *      description: |
+ *        This should return a list of all zones if you are logged in as an admin. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      responses: 
+ *        "200":
+ *          description: Array containing all zones.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items: 
+ *                  $ref: '#/components/schemas/Zone'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.get("/", auth, function(req, res, next) {
     // Check permissions
     if (req.user.role != "admin") return res.status(401).end();
@@ -17,7 +46,43 @@ router.get("/", auth, function(req, res, next) {
     }); 
 });
 
-/* GET zone by id. */ //TODO authenticatie?
+//TODO authenticatie voor admins/members?
+/** GET zone by id
+ * @swagger
+ * /API/zones/id/{zoneId}:
+ *    get:
+ *      tags: [Zones]
+ *      description: |
+ *        This should return a zone by entering it's id if you are logged in as an either role. <br> <br>
+ *        When you are not logged in, it should return a 401 error. <br> <br>
+ *        When you enter an id of a zone that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: zoneId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: Id of the zone.
+ *      responses: 
+ *        "200":
+ *          description: Zone with the matching id.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                $ref: '#/components/schemas/Zone'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Not found - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("zoneId", function(req, res, next, id) {
     models.Zone.findOne({attributes: ['id', 'zoneName'], where: {id: id}})
       .catch(err => {
@@ -37,7 +102,39 @@ router.get("/id/:zoneId", auth, function(req, res, next) {
 
 //TODO evt get zone by name, allhoewel er niet zoveel zijn dus weet niet of nodig
 
-/* CREATE zone */
+/** POST Create Zone
+ * @swagger
+ * /API/zones/create:
+ *    post:
+ *      tags: [Zones]
+ *      description: |
+ *        This request is used for creating zones. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - zoneName
+ *              properties:
+ *                zoneName:
+ *                  type: string
+ *                  description: The name of the zone.
+ *      responses: 
+ *        "200":
+ *          description: Zone that has been created.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/Zone'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.post("/create", auth, function(req, res, next) {
     if (req.user.role != "admin") return res.status(401).end();
     
@@ -56,7 +153,40 @@ router.post("/create", auth, function(req, res, next) {
     })
 });
 
-/* DELETE zone */
+//TODO update zone
+
+/** DELETE Delete Zone
+ * @swagger
+ * /API/zones/delete/{zoneId}:
+ *    delete:
+ *      tags: [Zones]
+ *      description: |
+ *        <b>BE CAREFUL USING THIS, IT CAN FUCK UP THE WHOLE SYSTEM.</b> <br> <br>
+ *        Make sure that no streets are assinged to the zone you want to delete. <br> <br>
+ *        This request is used for deleting zones. <br> <br>
+ *        Returns true when zone is deleted successfully, false when it failed. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      parameters:
+ *        - in: path
+ *          name: zoneId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: Id of the zone.
+ *      responses: 
+ *        "200":
+ *          description: Boolean.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  type: boolean
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("dZoneId", function(req, res, next, id) {
     models.Zone.destroy({where: {id: id}})
     .catch(err => {
@@ -67,9 +197,9 @@ router.param("dZoneId", function(req, res, next, id) {
       });
   });
   router.delete("/delete/:dZoneId", auth, function (req, res, next) {
+    // Check permissions
     if (req.user.role != "admin") return res.status(401).end();
       res.json(true);
   });
-
 
 module.exports = router;

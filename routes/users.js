@@ -18,10 +18,10 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  * @swagger
  * /API/users:
  *    get:
- *      description: |
- *        This should return a list of all users if you are logged in as an admin. 
- *        When you are not logged in as an admin, it should return a 401 error.
  *      tags: [Users]
+ *      description: |
+ *        This should return a list of all users if you are logged in as an admin. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
  *      responses: 
  *        "200":
  *          description: Array containing all users.
@@ -62,7 +62,42 @@ router.get("/", auth, function(req, res, next) {
   }); 
 });
 
-/* GET user by id. */
+/** GET users by id.
+ * @swagger
+ * /API/users/id/{userId}:
+ *    get:
+ *      tags: [Users]
+ *      description: |
+ *        This should return a user by entering it's id if you are logged in as an admin. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error. <br> <br>
+ *        When you enter an id of a user that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: userId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: Id of the user.
+ *      responses: 
+ *        "200":
+ *          description: User with the matching id.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/User'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Not found - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("userId", function(req, res, next, id) {
   models.User.findOne({include: [{
     model: models.Address,
@@ -96,7 +131,43 @@ router.get("/id/:userId", auth, function(req, res, next) {
   res.json(req.receivedUser);
 });
 
-/* GET user by email. */
+/** GET users by email.
+ * @swagger
+ * /API/users/{email}:
+ *    get:
+ *      tags: [Users]
+ *      description: |
+ *        This should return a user by entering it's email if you are logged in as either role. <br> <br>
+ *        When you are not logged in, it should return a 401 error. <br> <br>
+ *        When you enter an email of a user that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: email
+ *          required: true
+ *          schema:
+ *            type: string
+ *            format: email
+ *            description: Email of the user.
+ *      responses: 
+ *        "200":
+ *          description: User with the matching email.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/User'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Not found - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("email", function(req, res, next, email) {
   models.User.findOne({include: [{
     model: models.Address,
@@ -129,7 +200,41 @@ router.get("/:email", auth, function(req, res, next) {
 
 //TODO Evt get users by street?
 
-/* REGISTER / LOGIN functionality */
+/** POST isValidEmail
+ * @swagger
+ * /API/users/isValidEmail:
+ *    post:
+ *      tags: [Users]
+ *      description: |
+ *        This request checks if the email is valid, and if its not in use already. <br> <br>
+ *        If those two requirements are met, it should return true, else it will return false. <br> <br>
+ *        This is an unauthorized request, because it gets used by the register functionallity. <br> <br>
+ *        Should you be confused about the example values from the Request body, it's all explained in the Schema.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - email
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  description: The email that should be validated.
+ *                oldEmail: 
+ *                  type: string
+ *                  format: email
+ *                  nullable: true
+ *                  description: This is here to add the current email address to the pool of available email addresses if a user wishes to change his email address.
+ *      responses: 
+ *        "200":
+ *          description: Boolean.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  type: boolean
+ */
 router.post("/isValidEmail", function(req, res, next) {
   // Check if all fields are filled in
   if (!req.body.email)
@@ -150,7 +255,75 @@ router.post("/isValidEmail", function(req, res, next) {
     });
 });
 
-// REGISTER USER
+/** POST Register User
+ * @swagger
+ * /API/users/register:
+ *    post:
+ *      tags: [Users]
+ *      description: |
+ *        This request is used for registering normal users. <br> <br>
+ *        This is an unauthorized request. <br> <br>
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - firstName
+ *                - lastName
+ *                - email
+ *                - password
+ *                - birthday
+ *                - streetName
+ *                - streetNumber
+ *                - cityName
+ *                - postalCode
+ *              properties:
+ *                firstName:
+ *                  type: string
+ *                  description: The first name of the user.
+ *                lastName:
+ *                  type: string
+ *                  description: The last name of the user.
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  description: The email of the user.
+ *                password:
+ *                  type: string
+ *                  format: password
+ *                  description: The password of the user.
+ *                birthday: 
+ *                  type: string
+ *                  format: date-time
+ *                  description: The birthday of the user.
+ *                streetName:
+ *                  type: string
+ *                  description: The street name of the user's home.
+ *                streetNumber:
+ *                  type: integer
+ *                  description: The street number of the user's home.
+ *                cityName: 
+ *                  type: string
+ *                  description: The city in which the user's home is located.
+ *                postalCode:
+ *                  type: integer
+ *                  description: The postalcode of the user's city.
+ *      responses: 
+ *        "200":
+ *          description: User that has been registered.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Password not strong enough.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: string
+ *                description: This will contain an error message.
+ */
 router.post("/register", function(req, res, next) {
   // Check if all required fields are filled in
   if (
@@ -220,7 +393,6 @@ router.post("/register", function(req, res, next) {
   });
 
   //Saving the whole thing into database
-  //TODO mogelijke duplicate code weg
   user.setPassword(req.body.password);
   doesCityExist(req.body.cityName).then(exists => {
      if(exists) {
@@ -306,8 +478,56 @@ router.post("/register", function(req, res, next) {
   });
 });
 
-// REGISTER MEMBER
-router.post("/splintereremonie", function(req, res, next) {
+/** POST Register Member
+ * @swagger
+ * /API/users/registerMember:
+ *    post:
+ *      tags: [Users]
+ *      description: |
+ *        This request is used for registering members. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error. <br> <br>
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - email
+ *                - password
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  description: The email of the member.
+ *                password:
+ *                  type: string
+ *                  format: password
+ *                  description: The password of the member.
+ *      responses: 
+ *        "200":
+ *          description: Member that has been registered.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Password not strong enough.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: string
+ *                description: This will contain an error message.
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
+router.post("/registerMember", auth, function(req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+
   // Check if all required fields are filled in
   if (
     !req.body.email ||
@@ -330,8 +550,56 @@ router.post("/splintereremonie", function(req, res, next) {
   });
 });
 
-// REGISTER ADMIN
-router.post("/victorisdebeste", function(req, res, next) {
+/** POST Register Admin
+ * @swagger
+ * /API/users/registerAdmin:
+ *    post:
+ *      tags: [Users]
+ *      description: |
+ *        This request is used for registering admins. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error. <br> <br>
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - email
+ *                - password
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  description: The email of the admin.
+ *                password:
+ *                  type: string
+ *                  format: password
+ *                  description: The password of the admin.
+ *      responses: 
+ *        "200":
+ *          description: Admin that has been registered.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Password not strong enough.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: string
+ *                description: This will contain an error message.
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
+router.post("/registerAdmin", auth, function(req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+
   // Check if all required fields are filled in
   if (
     !req.body.email ||

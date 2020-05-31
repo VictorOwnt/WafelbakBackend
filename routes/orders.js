@@ -6,10 +6,39 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 
-let auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+/**
+ * @swagger
+ * tags:
+ *   name: Orders
+ *   description: Order management
+ */
 
-
-/* GET orders listing. */       //TODO enkel orders voor bepaald jaar?
+//TODO enkel orders voor bepaald jaar?
+/** GET orderslisting.
+ * @swagger
+ * /API/orders:
+ *    get:
+ *      tags: [Orders]
+ *      description: |
+ *        This should return a list of all orders if you are logged in as an admin. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      responses: 
+ *        "200":
+ *          description: Array containing all orders.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items: 
+ *                  $ref: '#/components/schemas/Order'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.get("/", auth, function(req, res, next) {
     // Check permissions
     if (req.user.role != "admin") return res.status(401).end();

@@ -10,11 +10,11 @@ This is a RESTful API for the applications.
 
 ## Getting Started
 
-The server is currently hosted by [Google Cloud](https://cloud.google.com) [![Website](https://img.shields.io/website?label=backend&logo=google%20cloud&url=https%3A%2F%2Fwafelbak-api-p4tlzt4yxq-ew.a.run.app%2Fdocs)](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs).
+The server is currently hosted by [Google Cloud](https://cloud.google.com) [![Website](https://img.shields.io/website?label=backend&logo=google%20cloud&url=https%3A%2F%2Fwafelbak-api-p4tlzt4yxq-ew.a.run.app)](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app).
 
-> ### [`hhttps://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs`](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs)
+> ### [`hhttps://wafelbak-api-p4tlzt4yxq-ew.a.run.app`](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app)
 
-[**Visit the documentation website**](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app/docs)
+[**Visit the documentation website**](https://wafelbak-api-p4tlzt4yxq-ew.a.run.app)
 
 ### Installation
 

@@ -100,6 +100,11 @@ var app = express();
 // Swagger endpoint
 app.use('/API/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Home page redirect to swagger
+app.get('/', (req, res) => {
+  res.redirect('/API/docs');
+});
+
 // cors for cross origin requests
 let cors = require('cors');
 app.use(cors({ origin: '*' }));

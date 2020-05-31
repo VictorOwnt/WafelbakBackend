@@ -5,12 +5,43 @@ const jwt = require('express-jwt');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-let auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+/**
+ * @swagger
+ * tags:
+ *   name: Streets
+ *   description: Street management
+ */
 
-/* GET street listing. */
+
+/** GET streets listing.
+ * @swagger
+ * /API/streets:
+ *    get:
+ *      tags: [Streets]
+ *      description: |
+ *        This should return a list of all streets if you are logged in as a member or admin. <br> <br>
+ *        When you are not logged in as a member or admin, it should return a 401 error.
+ *      responses: 
+ *        "200":
+ *          description: Array containing all streets.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items: 
+ *                  $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.get("/", auth, function(req, res, next) {
     // Check permissions
-    if (req.user.role != "admin") return res.status(401).end();
+    if (req.user.role != "admin" || req.user.role !='member') return res.status(401).end();
+
     models.Street.findAll({ include: [{
       model: models.City,
     attributes: ['cityName', 'postalCode']
@@ -25,7 +56,43 @@ router.get("/", auth, function(req, res, next) {
     }); 
 });
 
-/* GET street by id. */ //TODO authenticatie?
+//TODO authenticatie voor admins/members?
+/** GET street by id
+ * @swagger
+ * /API/streets/id/{streetId}:
+ *    get:
+ *      tags: [Streets]
+ *      description: |
+ *        This should return a street by entering it's id if you are logged in as an either role. <br> <br>
+ *        When you are not logged in, it should return a 401 error. <br> <br>
+ *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: streetId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: Id of the street.
+ *      responses: 
+ *        "200":
+ *          description: Street with the matching id.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Not found - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("streetId", function(req, res, next, id) {
   models.Street.findOne({ include: [{
     model: models.City,
@@ -50,7 +117,37 @@ where: {id: id} })
     res.json(req.receivedStreet);
   });
 
-/* GET streets by name. */ //TODO authenticatie?
+//TODO authenticatie voor admins/members?
+/** GET street by name
+ * @swagger
+ * /API/streets/byName/{name}:
+ *    get:
+ *      tags: [Streets]
+ *      description: |
+ *        This should return a street by entering it's name if you are logged in as an either role. <br> <br>
+ *        When you are not logged in, it should return a 401 error. <br> <br>
+ *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: name
+ *          required: true
+ *          schema:
+ *            type: string
+ *            description: Name of the street.
+ *      responses: 
+ *        "200":
+ *          description: Street with the matching name.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("name", function(req, res, next, name) {
   models.Street.findAll({ include: [{
     model: models.City,
@@ -76,7 +173,39 @@ router.get("/byName/:name", auth, function(req, res, next) {
 });
 
 
-/* GET streets by city. */ //TODO authenticatie?
+//TODO authenticatie voor admins/members?
+/** GET streets by city
+ * @swagger
+ * /API/streets/byCity/{cityName}:
+ *    get:
+ *      tags: [Streets]
+ *      description: |
+ *        This should return all streets in city by entering the city name if you are logged in as an either role. <br> <br>
+ *        When you are not logged in, it should return a 401 error. <br> <br>
+ *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: cityName
+ *          required: true
+ *          schema:
+ *            type: string
+ *            description: Name of the city.
+ *      responses: 
+ *        "200":
+ *          description: Array of streets in the city with the matching name.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("cityName", function(req, res, next, cityName) {
   models.Street.findAll({ include: [{
     model: models.City,
@@ -101,7 +230,39 @@ router.get("/byCity/:cityName", auth, function(req, res, next) {
     res.json(req.receivedStreets);
 });
 
-/* GET streets by zone. */ //TODO authenticatie? + eventuele verplaatsing naar zones router?
+//TODO  eventule verplaatsing naar zones routes?
+/** GET streets by zone
+ * @swagger
+ * /API/streets/byZone/{zoneName}:
+ *    get:
+ *      tags: [Streets]
+ *      description: |
+ *        This should return all streets in a zone by entering the zone name if you are logged in as an admin. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error. <br> <br>
+ *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *      parameters: 
+ *        - in: path
+ *          name: zoneName
+ *          required: true
+ *          schema:
+ *            type: string
+ *            description: Name of the zone.
+ *      responses: 
+ *        "200":
+ *          description: Array of streets in the zone with the matching name.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("zoneName", function(req, res, next, zoneName) {
   models.Street.findAll({ include: [{
     model: models.City,
@@ -123,12 +284,74 @@ router.param("zoneName", function(req, res, next, zoneName) {
     });
 });
 router.get("/byZone/:zoneName", auth, function(req, res, next) {  
+    // Check permissions
+    if (req.user.role != "admin") return res.status(401).end();
+
     res.json(req.receivedStreets);
 });
  
-/* POST create Street. */
+/** POST Create Street
+ * @swagger
+ * /API/streets/create:
+ *    post:
+ *      tags: [Streets]
+ *      description: |
+ *        This request is used for creating streets. <br> <br>
+ *        When you are not logged in as either role, it should return a 401 error.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - streetName
+ *                - cityName
+ *                - postalCode
+ *              properties:
+ *                streetName:
+ *                  type: string
+ *                  description: The name of the street.
+ *                cityName:
+ *                  type: string
+ *                  description: The name of the city.
+ *                postalCode: 
+ *                  type: string
+ *                  description: The postal code of the city.
+ *      responses: 
+ *        "200":
+ *          description: Street that has been created.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  type: object
+ *                  properties:
+ *                    id:
+ *                      type: integer
+ *                      description: Id of the newly created street.
+ *                    streetName:
+ *                      type: string
+ *                      description: The name of the newly created street.
+ *                    CityId: 
+ *                      type: integer
+ *                      description: The id of the city the newly created street is linked to.
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Street does already exist - Internal Sever Error.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.post("/create", auth, function(req, res, next) {
-    // Check if all required fields are filled in
+  // Check permissions
+  if (req.user.role != "admin" || req.user.role !='member') return res.status(401).end();
+
+  // Check if all required fields are filled in
   if (
     !req.body.streetName ||
     !req.body.cityName ||
@@ -188,8 +411,51 @@ router.post("/create", auth, function(req, res, next) {
   })
 });
 
-/* PATCH set Zones */ //TODO eventuele verplaatsing naar zones router?
-//sets zone for multiple (or one) street
+//TODO eventuele verplaatsing naar zones router?
+/** PATCH set Zones 
+ * @swagger
+ * /API/streets/setZone:
+ *    patch:
+ *      tags: [Streets]
+ *      description: |
+ *        This request is used for adding streets to specific zones. <br> <br>
+ *        It is possible to enter multiple street names. <br> <br>
+ *        If the zone doesn't exist, the request wont come through. <br> <br>
+ *        If a wrong streetname is filled in, it will skip that one, but still do the others. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - streetNames
+ *                - zoneName
+ *              properties:
+ *                streetNames:
+ *                  type: array
+ *                  items:
+ *                    type: string
+ *                  description: The names of the streets.
+ *                zoneName:
+ *                  type: string
+ *                  description: The name of the zone in which the streets need to be added.
+ *      responses: 
+ *        "200":
+ *          description: Array of the streets with their new assigned zones.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Street'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.patch("/setZone", auth, function(req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
@@ -222,8 +488,39 @@ router.patch("/setZone", auth, function(req, res, next) {
 
 //TODO is een update street nodig?
 
-/* DELETE street */ //misschien deze weghalen, is gevaarlijk, kan gans systeem omzeep helpen
+ //misschien deze weghalen, is gevaarlijk, kan gans systeem omzeep helpen
 //TODO superadmin (aka ik kan dit enekel aanhalen)
+/** DELETE Delete Street
+ * @swagger
+ * /API/zones/delete/{streetId}:
+ *    delete:
+ *      tags: [Streets]
+ *      description: |
+ *        <b>BE CAREFUL USING THIS, IT CAN FUCK UP THE WHOLE SYSTEM.</b> <br> <br>
+ *        This request is used for deleting street. <br> <br>
+ *        Returns true when zone is deleted successfully, false when it failed. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      parameters:
+ *        - in: path
+ *          name: streetId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: Id of the street.
+ *      responses: 
+ *        "200":
+ *          description: Boolean.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                  type: boolean
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.param("dStreetId", function(req, res, next, id) {
   models.Street.destroy({where: {id: id}})
   .catch(err => {
