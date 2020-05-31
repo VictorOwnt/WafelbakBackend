@@ -1,6 +1,45 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
+/**
+ * @swagger
+ *  components:
+ *      schemas: 
+ *          User:
+ *              type: object
+ *              required:
+ *                  - email
+ *                  - role
+ *              properties:
+ *                  id: 
+ *                      type: integer
+ *                      readOnly: true
+ *                      description: The id of the user.
+ *                  firstName: 
+ *                      type: string
+ *                      nullable: true
+ *                      description: The first name of the user.
+ *                  lastName: 
+ *                      type: string
+ *                      nullable: true
+ *                      description: The last name of the user.
+ *                  email: 
+ *                      type: string
+ *                      format: email
+ *                      description: The email of the user.
+ *                  birthday: 
+ *                      type: string
+ *                      nullable: true
+ *                      format: date-time
+ *                      description: The birthday of the user.
+ *                  role: 
+ *                      type: string
+ *                      description: The role of the user.
+ *                  Address: 
+ *                      $ref: '#/components/schemas/Address'
+ *                      nullable: true
+ *                      description: The address of the user.
+ */
 module.exports = (sequelize, DataTypes) => {
     var User = sequelize.define('User', {
         firstName: {type: DataTypes.STRING},

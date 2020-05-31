@@ -7,8 +7,37 @@ const zxcvbn = require("zxcvbn");
 const validator = require('email-validator');
 
 const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management
+ */
 
-/* GET users listing. */
+/** GET users listing.
+ * @swagger
+ * /API/users:
+ *    get:
+ *      description: |
+ *        This should return a list of all users if you are logged in as an admin. 
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      tags: [Users]
+ *      responses: 
+ *        "200":
+ *          description: Array containing all users.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: array
+ *                items: 
+ *                  $ref: '#/components/schemas/User'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
 router.get("/", auth, function(req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
