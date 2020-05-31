@@ -4,25 +4,20 @@ const Sequelize = require('sequelize');
 const basename  = path.basename(__filename);
 const db = {};
 
-// SSL certificates for development only, cut out when you want to create prodcution
-const cKey = fs.readFileSync('../SSL-Certificates/client-key.pem');
-const cCert = fs.readFileSync('../SSL-Certificates/client-cert.pem');
-const cCA = fs.readFileSync('../SSL-Certificates/server-ca.pem');
-
 //switch uncommented/commented for envrionment switch
 var sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
-  host: process.env.DATABASE_SERVER, // `/cloudsql/${process.env.DATABASE_SERVER}`
+  host: `/cloudsql/${process.env.DATABASE_SERVER}`, //process.env.DATABASE_SERVER 
   // port should be in comments for production
-  port: '3306',
+  // port: '3306',
   dialect: process.env.DATABASE_DIALECT,
   dialectOptions: {
     // ssl should be in comments for production
-    // socketPath: `/cloudsql/${process.env.DATABASE_SERVER}`
-    ssl: {
+    socketPath: `/cloudsql/${process.env.DATABASE_SERVER}`
+    /* ssl: {
       key: cKey,
       cert: cCert,
       ca: cCA,
-    }
+    }*/
   }
 });
 
