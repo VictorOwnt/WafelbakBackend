@@ -1,8 +1,8 @@
-<p align="center"><img src="./backend_icon.svg" width="200px"/></p>
+<p align="center"><img src="./ic_launcher-web.png?raw=true" width="200px"/></p>
 
 <h1 align="center">Wafelbak API</h1>
 
-The 'Wafelbak' Android application is an application made to facilitate the process of ordering waffles for the benefit of ([Scouts Wondelgem](http://www.scoutswondelgem.be)).
+The 'Wafelbak' Web and Android applications are applications made to facilitate the process of ordering waffles for the benefit of ([Scouts Wondelgem](http://www.scoutswondelgem.be)).
 
 This is a RESTful API for the applications.
 
@@ -75,6 +75,26 @@ Admin:
 We've included our [Insomnia](https://insomnia.rest/) configuration file for testing API calls. No automated end-to-end tests (yet).
 
 You can find a guide on how to import this [here](https://support.insomnia.rest/article/52-importing-and-exporting-data). The data is located in the `Insomnia_2020_01_05.json` file.
+<!--
+### Azure SQL Database
+-->
+<!--
+This API relies on a [Microsoft Azure](azure.microsoft.com) database.
+-->
+<!--
+1. Create a new file `.env` in the root folder of the project
+2. Open the file and add following lines to it:
+
+    ```bash
+    WAFELBAK_BACKEND_SECRET="VictorIsDeBeste"
+    WAFELBAK_DATABASE="WafelbakDatabase"
+    DATABASE_USER="victorvh"
+    DATABASE_PASSWORD="123Victor"
+    DATABASE_SERVER="wafelbakserver.database.windows.net"
+    DATABASE_DIALECT="mssql"
+    ```-->
+<!--
+3. It is now possible to test the API with our database. **Don't abuse this.** Change the values to your own values when deploying. -->
 
 ## Built With
 
