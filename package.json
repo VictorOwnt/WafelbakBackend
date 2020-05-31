@@ -34,6 +34,7 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "sequelize": "^5.21.3",
+    "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.2",
     "tedious": "^6.6.5",
     "zxcvbn": "^4.4.2"

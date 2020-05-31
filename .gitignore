@@ -212,3 +212,9 @@ secrets.sh
 
 # Local dev bundle
 local-dev/bundle.js
+
+# Local computer configurations
+.vscode
+
+# Insomnia files
+Insomnia*

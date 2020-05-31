@@ -4,8 +4,84 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
+
+// Swagger
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
+const swaggerJSDoc = require('swagger-jsdoc');
+let options = {
+    swaggerDefinition: {
+      openapi: "3.0.1",
+      info: {
+        title: 'Wafelbak API', // Title (required)
+        version: '1.0.0', // Version (required)
+        description: 'The offical documentation of the Wafelbak API.',
+      },
+      servers: [
+        {
+          url: "https://wafelbak-api-p4tlzt4yxq-ew.a.run.app",
+          description: "Production server"
+        },
+        {
+          url: "http://localhost:3000",
+          description: "Development server"
+        }
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          }
+        },
+        schemas: {
+          Error: {
+            type: 'object',
+            properties: {
+              error: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    description: 'The name of the error.'
+                  },
+                  message: {
+                    type: 'string', 
+                    description: 'The message of the error.'
+                  },
+                  code: {
+                    type: 'string',
+                    description: 'The code of the error.'
+                  },
+                  status: {
+                    type: 'integer',
+                    description: 'The status of the error.'
+                  }, 
+                  inner: {
+                    type: 'object',
+                    properties: {
+                      message: {
+                        type: 'string',
+                        description: 'Inner message of the error.'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+      },
+      security: [
+        {
+          bearerAuth: []
+        }
+      ],
+    },
+    // Path to the API docs
+    apis: ['./routes/*.js', './models/*.js'],
+};
+const swaggerSpec = swaggerJSDoc(options);
 
 // Environment variables
 require('dotenv').config();
@@ -16,11 +92,13 @@ require('./config/passport');
 // Routes
 var usersRouter = require('./routes/users');
 var ordersRouter = require('./routes/orders');
+var streetsRouter = require('./routes/streets');
+var zonesRouter = require('./routes/zones');
 
 var app = express();
 
 // Swagger endpoint
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/API/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // cors for cross origin requests
 let cors = require('cors');
@@ -35,6 +113,8 @@ app.use(passport.initialize());
 
 app.use('/API/users', usersRouter);
 app.use('/API/orders', ordersRouter);
+app.use('/API/streets', streetsRouter);
+app.use('/API/zones', zonesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
