@@ -160,7 +160,9 @@ router.get("/id/:streetId", auth, function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                $ref: '#/components/schemas/Street'
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Street'
  *        "400": 
  *          description: Bad Request, street doens't exist.
  *          content: 
@@ -377,7 +379,7 @@ router.get("/byZone/:zoneName", auth, function (req, res, next) {
  *                  type: string
  *                  description: The name of the city.
  *                postalCode: 
- *                  type: string
+ *                  type: integer
  *                  description: The postal code of the city.
  *      responses: 
  *        "200":
@@ -397,7 +399,7 @@ router.get("/byZone/:zoneName", auth, function (req, res, next) {
  *                      type: integer
  *                      description: The id of the city the newly created street is linked to.
  *        "400": 
- *          description: Bad Reqeust, required fields are not filled out.
+ *          description: Bad Request, required fields are not filled out.
  *          content: 
  *            application/json:
  *              schema: 
@@ -483,7 +485,7 @@ router.post("/create", auth, function (req, res, next) {
   })
 });
 
-//TODO eventuele verplaatsing naar zones router?
+//TODO evenuteel veranderen naar parameter zoals in complete order? 
 /** PATCH set Zones 
  * @swagger
  * /API/streets/setZone:
@@ -492,7 +494,7 @@ router.post("/create", auth, function (req, res, next) {
  *      description: |
  *        This request is used for adding streets to specific zones. <br> <br>
  *        It is possible to enter multiple street names. <br> <br>
- *        If the zone doesn't exist, the request wont come through. <br> <br>
+ *        If the zone doesn't exist, it should return a 400 error. <br> <br>
  *        If a wrong streetname is filled in, it will skip that one, but still do the others. <br> <br>
  *        When you are not logged in as an admin, it should return a 401 error.
  *      requestBody: 
@@ -548,7 +550,7 @@ router.patch("/setZone", auth, function (req, res, next) {
     return next(err);
   }).then(function (zone) {
     if (!zone) {
-      return res.status(400).json("No zone found with nam " + req.body.zoneName + ".");
+      return res.status(400).json("No zone found with name " + req.body.zoneName + ".");
     } else {
       models.Street.update({ ZoneId: zone.id }, { where: { streetName: req.body.streetNames } }).catch(err => {
         return next(err);
@@ -572,14 +574,14 @@ router.patch("/setZone", auth, function (req, res, next) {
   });
 });
 
-/** PATCH update street
+//TODO change this requiest like update order? with param?
+/** PATCH Update street
  * @swagger
  * /API/streets/updateStreet:
  *    patch:
  *      tags: [Streets]
  *      description: |
  *        This request is used for updating a street. <br> <br>
- *        If the street doesn't exist, an error 500 will be thrown. <br> <br>
  *        When you are not logged in as an admin, it should return a 401 error.
  *      requestBody: 
  *        content:
@@ -611,7 +613,7 @@ router.patch("/setZone", auth, function (req, res, next) {
  *                    type: string
  *                    description: The name of the street that has been updated.
  *        "400": 
- *          description: Street can't be updatet because there already exists one with that name.
+ *          description: Bad Request, Street can't be updatet because there already exists one with that name.
  *          content:
  *            application/json:
  *              schema:
@@ -655,13 +657,13 @@ router.patch("/updateStreet", auth, function (req, res, next) {
 //TODO superadmin (aka ik kan dit enekel aanhalen)
 /** DELETE Delete Street
  * @swagger
- * /API/zones/delete/{streetId}:
+ * /API/streets/delete/{streetId}:
  *    delete:
  *      tags: [Streets]
  *      description: |
  *        <b>BE CAREFUL USING THIS, IT CAN FUCK UP THE WHOLE SYSTEM.</b> <br> <br>
  *        This request is used for deleting street. <br> <br>
- *        Returns true when zone is deleted successfully, false when it failed. <br> <br>
+ *        Returns true when street is deleted successfully, false when it failed. <br> <br>
  *        When you are not logged in as an admin, it should return a 401 error.
  *      parameters:
  *        - in: path
