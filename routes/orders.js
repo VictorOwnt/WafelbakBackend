@@ -38,6 +38,12 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.get("/", auth, function (req, res, next) {
   // Check permissions

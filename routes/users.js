@@ -37,6 +37,12 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.get("/", auth, function (req, res, next) {
   // Check permissions
@@ -87,6 +93,12 @@ router.get("/", auth, function (req, res, next) {
  *            application/json: 
  *              schema: 
  *                  $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Bad Request, user doesn't exist.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
@@ -94,7 +106,7 @@ router.get("/", auth, function (req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  *        "500": 
- *          description: Not found - Internal Server Error.
+ *          description: Server may be down - Internal Server Error.
  *          content:
  *            application/json:
  *              schema:
@@ -121,7 +133,7 @@ router.param("userId", function (req, res, next, id) {
       return next(err);
     }).then(function (user) {
       if (!user) {
-        return next(new Error("not found " + id));
+        return res.status(400).json("User with id: " + id + " not found.");
       } else {
         req.receivedUser = user;
         return next();
@@ -159,6 +171,12 @@ router.get("/id/:userId", auth, function (req, res, next) {
  *            application/json: 
  *              schema: 
  *                  $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Bad Request, no user found with given email.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
@@ -166,7 +184,7 @@ router.get("/id/:userId", auth, function (req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  *        "500": 
- *          description: Not found - Internal Server Error.
+ *          description: Server may be down - Internal Server Error.
  *          content:
  *            application/json:
  *              schema:
@@ -193,7 +211,7 @@ router.param("email", function (req, res, next, email) {
       return next(err);
     }).then(function (user) {
       if (!user) {
-        return next(new Error("No user found with email '" + email + "'."));
+        return res.status(400).json("No user found with email: " + email + ".");
       } else {
         req.receivedUser = user;
         return next();
@@ -240,6 +258,18 @@ router.get("/:email", auth, function (req, res, next) {
  *            application/json: 
  *              schema: 
  *                  type: boolean
+ *        "400": 
+ *          description: Bad Request, required fields are not filled in.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.post("/isValidEmail", function (req, res, next) {
   // Check if all fields are filled in
@@ -248,14 +278,14 @@ router.post("/isValidEmail", function (req, res, next) {
 
   if (req.body.oldEmail) {
     if (req.body.email === req.body.oldEmail) {
-      res.send(true);
+      res.json(true);
     }
   }
   models.User.findOne({ where: { email: req.body.email.trim().toLowerCase() } }).then(function (result) {
     if (result !== null) {
-      res.send(false);
+      res.json(false);
     } else
-      res.send(validator.validate(req.body.email.trim().toLowerCase()));
+      res.json(validator.validate(req.body.email.trim().toLowerCase()));
   });
 });
 
@@ -321,12 +351,18 @@ router.post("/isValidEmail", function (req, res, next) {
  *              schema: 
  *                  $ref: '#/components/schemas/User'
  *        "400": 
- *          description: Password not strong enough.
+ *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
  *            application/json:
  *              schema:
  *                type: string
  *                description: This will contain an error message.
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.post("/register", function (req, res, next) {
   // Check if all required fields are filled in
@@ -341,10 +377,10 @@ router.post("/register", function (req, res, next) {
     !req.body.cityName ||
     !req.body.postalCode
   )
-    return res.status(400).send("Gelieve alle velden in te vullen.");
+    return res.status(400).json("Please fill out all fields.");
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
-    return res.status(400).send("Wachtwoord is niet sterk genoeg.");
+    return res.status(400).json("Password isn't strong enough.");
 
   // Creating new User
   let user = models.User.build({
@@ -515,7 +551,7 @@ router.post("/register", function (req, res, next) {
  *              schema: 
  *                  $ref: '#/components/schemas/User'
  *        "400": 
- *          description: Password not strong enough.
+ *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
  *            application/json:
  *              schema:
@@ -527,6 +563,12 @@ router.post("/register", function (req, res, next) {
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error' 
  */
 router.post("/registerMember", auth, function (req, res, next) {
   // Check permissions
@@ -536,10 +578,10 @@ router.post("/registerMember", auth, function (req, res, next) {
   if (
     !req.body.email ||
     !req.body.password)
-    return res.status(400).send("Gelieve alle velden in te vullen.");
+    return res.status(400).json("Please fill out all fields.");
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
-    return res.status(400).send("Wachtwoord is niet sterk genoeg.");
+    return res.status(400).json("Password isn't strong enough.");
 
   let member = models.User.build({
     email: req.body.email.trim().toLowerCase(),
@@ -587,7 +629,7 @@ router.post("/registerMember", auth, function (req, res, next) {
  *              schema: 
  *                  $ref: '#/components/schemas/User'
  *        "400": 
- *          description: Password not strong enough.
+ *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
  *            application/json:
  *              schema:
@@ -599,6 +641,12 @@ router.post("/registerMember", auth, function (req, res, next) {
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.post("/registerAdmin", auth, function (req, res, next) {
   // Check permissions
@@ -608,10 +656,10 @@ router.post("/registerAdmin", auth, function (req, res, next) {
   if (
     !req.body.email ||
     !req.body.password)
-    return res.status(400).send("Gelieve alle velden in te vullen.");
+    return res.status(400).json("Please fill out all fields.");
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
-    return res.status(400).send("Wachtwoord is niet sterk genoeg.");
+    return res.status(400).json("Password isn't strong enough.");
 
   let admin = models.User.build({
     email: req.body.email.trim().toLowerCase(),
@@ -626,10 +674,63 @@ router.post("/registerAdmin", auth, function (req, res, next) {
   });
 });
 
+/** POST Login
+ * @swagger
+ * /API/users/login:
+ *    post:
+ *      tags: [Users]
+ *      description: |
+ *        This request is used for logging in. <br> <br>
+ *        Use this to get your token, then you can proceed testing here on the SwaggerUI. <br> <br>
+ *        This request returns user + token.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - email
+ *                - password
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  description: The email of the user.
+ *                password:
+ *                  type: string
+ *                  format: password
+ *                  description: The password of the user.
+ *      responses: 
+ *        "200":
+ *          description: Token of the user that has been logged in.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                $ref: '#/components/schemas/User'
+ *        "400": 
+ *          description: Bad Request, fields not filled out.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: string
+ *                description: This will contain an error message.
+ *        "401": 
+ *          description: Invalid login info.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#components/schemas/Error' 
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.post("/login", function (req, res, next) {
   // Check if all fields are filled in
   if (!req.body.email || !req.body.password) {
-    return res.status(400).send("Gelieve alle velden in te vullen.");
+    return res.status(400).json("Please fill out all fields.");
   }
   passport.authenticate("local", function (err, user, info) {
     if (err) {
