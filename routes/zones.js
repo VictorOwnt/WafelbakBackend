@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const models  = require('../models');
+const models = require('../models');
 const jwt = require('express-jwt');
 
 const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
@@ -34,16 +34,22 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  */
-router.get("/", auth, function(req, res, next) {
-    // Check permissions
-    if (req.user.role != "admin") return res.status(401).end();
-    models.Zone.findAll({attributes: ['id', 'zoneName']})
+router.get("/", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+  models.Zone.findAll({ attributes: ['id', 'zoneName'] })
     .catch(err => {
       return next(err);
-    }).then(function(zones) {
+    }).then(function (zones) {
       res.json(zones)
-    }); 
+    });
 });
 
 //TODO authenticatie voor admins/members?
@@ -70,6 +76,12 @@ router.get("/", auth, function(req, res, next) {
  *            application/json: 
  *              schema: 
  *                $ref: '#/components/schemas/Zone'
+ *        "400": 
+ *          description: Bad Request, zone doesn't exist.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
@@ -77,27 +89,27 @@ router.get("/", auth, function(req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  *        "500": 
- *          description: Not found - Internal Server Error.
+ *          description: Server may be down - Internal Server Error.
  *          content:
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.param("zoneId", function(req, res, next, id) {
-    models.Zone.findOne({attributes: ['id', 'zoneName'], where: {id: id}})
-      .catch(err => {
-        return next(err);
-      }).then(function(zone) {
-        if(!zone) {
-          return next(new Error("not found " + id));
-        } else {
-          req.receivedZone = zone;
-          return next();
-        }
-      });
+router.param("zoneId", function (req, res, next, id) {
+  models.Zone.findOne({ attributes: ['id', 'zoneName'], where: { id: id } })
+    .catch(err => {
+      return next(err);
+    }).then(function (zone) {
+      if (!zone) {
+        return res.status(400).json("Zone with id: " + id + " not found.");
+      } else {
+        req.receivedZone = zone;
+        return next();
+      }
     });
-router.get("/id/:zoneId", auth, function(req, res, next) {
-      res.json(req.receivedZone);
+});
+router.get("/id/:zoneId", auth, function (req, res, next) {
+  res.json(req.receivedZone);
 });
 
 //TODO evt get zone by name, allhoewel er niet zoveel zijn dus weet niet of nodig
@@ -128,32 +140,102 @@ router.get("/id/:zoneId", auth, function(req, res, next) {
  *            application/json: 
  *              schema: 
  *                  $ref: '#/components/schemas/Zone'
+ *        "400": 
+ *          description: Bad Reqeust, required fielsd are not filled out.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.post("/create", auth, function(req, res, next) {
-    if (req.user.role != "admin") return res.status(401).end();
-    
-    if (!req.body.zoneName)
-        return res.status(400).send("Gelieve alle noodzakelijke velden in te vullen.");
-    
-    //Creating Zone
-    let zone = models.Zone.build({
-        zoneName: req.body.zoneName
-    });
+router.post("/create", auth, function (req, res, next) {
+  if (req.user.role != "admin") return res.status(401).end();
 
-    zone.save().catch(err => {
-        return next(err);
-    }).then(() => {
-        return res.json(zone);
-    })
+  if (!req.body.zoneName)
+    return res.status(400).json("Please fill out all necessary fields.");
+
+  //Creating Zone
+  let zone = models.Zone.build({
+    zoneName: req.body.zoneName
+  });
+
+  zone.save().catch(err => {
+    return next(err);
+  }).then(() => {
+    return res.json(zone);
+  })
 });
 
-//TODO update zone
+/** PATCH update zone 
+ * @swagger
+ * /API/zones/updateZone:
+ *    patch:
+ *      tags: [Zones]
+ *      description: |
+ *        This request is used for updating a zone. <br> <br>
+ *        If the zone doesn't exist, an error 500 will be thrown. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - id
+ *                - zoneName
+ *              properties:
+ *                id: 
+ *                  type: integer
+ *                  description: The id of the zone that needs to be updated.
+ *                zoneName:
+ *                  type: string
+ *                  description: The name of the zone that needs to be updated.
+ *      responses: 
+ *        "200":
+ *          description: The updated zone.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                 $ref: '#/components/schemas/Zone'
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500":
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+//TODO error incompleter 
+router.patch("/updateZone", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+
+  models.Zone.update({ zoneName: req.body.zoneName }, { where: { id: req.body.id } }).catch(err => {
+    return next(err);
+  }).then(() => {
+    models.Zone.findOne({ attributes: ['id', 'zoneName'], where: { id: req.body.id } }).catch(err => {
+      return next(err);
+    }).then(function (zone) {
+      return res.json(zone)
+    });
+  });
+});
 
 /** DELETE Delete Zone
  * @swagger
@@ -186,20 +268,26 @@ router.post("/create", auth, function(req, res, next) {
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.param("dZoneId", function(req, res, next, id) {
-    models.Zone.destroy({where: {id: id}})
+router.param("dZoneId", function (req, res, next, id) {
+  models.Zone.destroy({ where: { id: id } })
     .catch(err => {
       return next(err);
     }).then(() => {
       //TODO weergeven van zone die verwijderd werd of skip?
-        return next();
-      });
-  });
-  router.delete("/delete/:dZoneId", auth, function (req, res, next) {
-    // Check permissions
-    if (req.user.role != "admin") return res.status(401).end();
-      res.json(true);
-  });
+      return next();
+    });
+});
+router.delete("/delete/:dZoneId", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+  res.json(true);
+});
 
 module.exports = router;

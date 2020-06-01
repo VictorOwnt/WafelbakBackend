@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const models  = require('../models');
+const models = require('../models');
 const jwt = require('express-jwt');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -39,10 +39,11 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  */
-router.get("/", auth, function(req, res, next) {
-    // Check permissions
-    if (req.user.role != "admin") return res.status(401).end();
-    models.Order.findAll({ include: [{
+router.get("/", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+  models.Order.findAll({
+    include: [{
       model: models.Address,
       include: [{
         model: models.Street,
@@ -52,74 +53,79 @@ router.get("/", auth, function(req, res, next) {
         }],
         attributes: ['streetName']
       }],
-    attributes: ['streetNumber', 'streetExtra']
-  }], attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment']})
+      attributes: ['streetNumber', 'streetExtra']
+    }], attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment']
+  })
     .catch(err => {
       return next(err);
-    }).then(function(orders) {
+    }).then(function (orders) {
       res.json(orders)
-    }); 
-  });
+    });
+});
 
 /* GET order by id. */ //TODO authenticatie?
-router.param("orderId", function(req, res, next, id) {
-  models.Order.findOne({ include: [{
-    model: models.Address,
+router.param("orderId", function (req, res, next, id) {
+  models.Order.findOne({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
+      attributes: ['streetNumber', 'streetExtra']
     }],
-  attributes: ['streetNumber', 'streetExtra']
-}], 
-attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
-where: {id: id} })
+    attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+    where: { id: id }
+  })
     .catch(err => {
       return next(err);
-    }).then(function(order) {
-      if(!order) {
+    }).then(function (order) {
+      if (!order) {
         return next(new Error("not found " + id));
       } else {
         req.receivedOrder = order;
         return next();
       }
     });
-  });
-  router.get("/id/:orderId", auth, function(req, res, next) {
-    res.json(req.receivedOrder);
-  });
+});
+router.get("/id/:orderId", auth, function (req, res, next) {
+  res.json(req.receivedOrder);
+});
 
 /* GET orders by status. */
-router.param("status", function(req, res, next, status) {
-  models.Order.findAll({ include: [{
-    model: models.Address,
+router.param("status", function (req, res, next, status) {
+  models.Order.findAll({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
+      attributes: ['streetNumber', 'streetExtra']
     }],
-  attributes: ['streetNumber', 'streetExtra']
-}], 
-attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
-where: {status: status} })
-  .catch(err => {
-    return next(err);
-  }).then(function(orders) {
-    if(orders.length === 0) { //TODO error handling met count fzo
-      return next(new Error("No orders found with status" + status + "."));
-    } else {
-      req.receivedOrders = orders;
-      return next();
-    }
+    attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+    where: { status: status }
   })
+    .catch(err => {
+      return next(err);
+    }).then(function (orders) {
+      if (orders.length === 0) { //TODO error handling met count fzo
+        return next(new Error("No orders found with status" + status + "."));
+      } else {
+        req.receivedOrders = orders;
+        return next();
+      }
+    })
 });
-router.get("/byStatus/:status", auth, function(req, res, next) {
+router.get("/byStatus/:status", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
 
@@ -127,25 +133,27 @@ router.get("/byStatus/:status", auth, function(req, res, next) {
 });
 
 /* GET orders by name. */ //TODO authenticatie?
-router.param("name", function(req, res, next, name) {
-  models.Order.findAll({ include: [{
-    model: models.Address,
+router.param("name", function (req, res, next, name) {
+  models.Order.findAll({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
+      attributes: ['streetNumber', 'streetExtra']
     }],
-  attributes: ['streetNumber', 'streetExtra']
-}], 
-attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
-where: {name: {[Op.like]: '%' + name + '%'}}})
+    attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+    where: { name: { [Op.like]: '%' + name + '%' } }
+  })
     .catch(err => {
       return next(err);
-    }).then(function(orders) {
-      if(orders.length === 0) {
+    }).then(function (orders) {
+      if (orders.length === 0) {
         return next(new Error("No orders found for name" + name + "."));
       } else {
         req.receivedOrders = orders;
@@ -153,21 +161,21 @@ where: {name: {[Op.like]: '%' + name + '%'}}})
       }
     })
 });
-router.get("/byName/:name", auth, function(req, res, next) {  
-    res.json(req.receivedOrders);
+router.get("/byName/:name", auth, function (req, res, next) {
+  res.json(req.receivedOrders);
 });
 
 //TODO orders by address/street/zone
- 
+
 /* POST create Order. */
-router.post("/create", auth, function(req, res, next) {
-    // Check if all required fields are filled in
+router.post("/create", auth, function (req, res, next) {
+  // Check if all required fields are filled in
   if (
     !req.body.name ||
     !req.body.streetName ||
     !req.body.streetNumber ||
     !req.body.amountOfWaffles ||
-    !req.body.desiredOrderTime )
+    !req.body.desiredOrderTime)
     return res.status(400).send("Gelieve alle noodzakelijke velden in te vullen.");
 
   let order = models.Order.build({
@@ -178,10 +186,10 @@ router.post("/create", auth, function(req, res, next) {
   });
 
   function doesAddressExist(streetName, streetNumber, streetExtra) {
-    return models.Address.count({include: {model: models.Street, where: {streetName: streetName}}, where: {streetNumber: streetNumber, streetExtra: streetExtra}}).catch(err => {
+    return models.Address.count({ include: { model: models.Street, where: { streetName: streetName } }, where: { streetNumber: streetNumber, streetExtra: streetExtra } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
@@ -196,30 +204,32 @@ router.post("/create", auth, function(req, res, next) {
   });
 
   doesAddressExist(req.body.streetName, req.body.streetNumber, req.body.streetExtra).then(exists => {
-    if(exists) {
-      models.Address.findOne({include: {model: models.Street, where: {streetName: req.body.streetName}},
-         where: {streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra}}).catch(err => {
-           return next(err);
-         }).then(function(address) {
-           orderAddress = address
-         }).then(() => {
-           order.save().catch(err => {
-             return next(err);
-           }).then(() => {
-             order.setAddress(orderAddress).catch(err => {
-               return next(err);
-             });
-           }).then(() => {
-             return res.json(order);
-           })
-         })
+    if (exists) {
+      models.Address.findOne({
+        include: { model: models.Street, where: { streetName: req.body.streetName } },
+        where: { streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra }
+      }).catch(err => {
+        return next(err);
+      }).then(function (address) {
+        orderAddress = address
+      }).then(() => {
+        order.save().catch(err => {
+          return next(err);
+        }).then(() => {
+          order.setAddress(orderAddress).catch(err => {
+            return next(err);
+          });
+        }).then(() => {
+          return res.json(order);
+        })
+      })
     } else {
       orderAddress.save().catch(err => {
         return next(err);
       }).then(() => {
-        models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
+        models.Street.findOne({ where: { streetName: req.body.streetName } }).catch(err => {
           return next(err);
-        }).then(function(street) {
+        }).then(function (street) {
           orderAddress.setStreet(street);
         }).then(() => {
           order.save().catch(err => {
@@ -238,45 +248,47 @@ router.post("/create", auth, function(req, res, next) {
 });
 
 /* COMPLETE Order */
-router.param("cOrderId", function(req, res, next, id) {
-  models.Order.update({ status: req.body.status }, {where: {id: id}})
-  .catch(err => {
-    return next(err);
-  }).then(() => {
-    models.Order.findOne({ include: [{
-      model: models.Address,
-      include: [{
-        model: models.Street,
+router.param("cOrderId", function (req, res, next, id) {
+  models.Order.update({ status: req.body.status }, { where: { id: id } })
+    .catch(err => {
+      return next(err);
+    }).then(() => {
+      models.Order.findOne({
         include: [{
-          model: models.City,
-          attributes: ['cityName', 'postalCode']
+          model: models.Address,
+          include: [{
+            model: models.Street,
+            include: [{
+              model: models.City,
+              attributes: ['cityName', 'postalCode']
+            }],
+            attributes: ['streetName']
+          }],
+          attributes: ['streetNumber', 'streetExtra']
         }],
-        attributes: ['streetName']
-      }],
-    attributes: ['streetNumber', 'streetExtra']
-  }], 
-  attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
-  where: {id: id} })
+        attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+        where: { id: id }
+      })
         .catch(err => {
           return next(err);
-        }).then(function(order) {
-          if(!order) {
+        }).then(function (order) {
+          if (!order) {
             return next(new Error("not found " + req.body.id));
           } else {
             req.receivedOrder = order;
             return next();
           }
         });
-      });
+    });
 });
-router.patch("/complete/:cOrderId", auth, function(req, res, next) {
+router.patch("/complete/:cOrderId", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
   res.json(req.receivedOrder);
 })
 
 /* UPDATE order */
-router.param("uOrderId", function(req, res, next, id) {
+router.param("uOrderId", function (req, res, next, id) {
   //Creating City
   let orderCity = models.City.build({
     cityName: req.body.cityName,
@@ -284,10 +296,10 @@ router.param("uOrderId", function(req, res, next, id) {
   });
 
   function doesCityExist(cityName) {
-    return models.City.count({where: {cityName: cityName}}).catch(err => {
+    return models.City.count({ where: { cityName: cityName } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
@@ -301,79 +313,81 @@ router.param("uOrderId", function(req, res, next, id) {
   });
 
   function doesStreetExist(streetName) {
-    return models.Street.count({where: {streetName: streetName}}).catch(err => {
+    return models.Street.count({ where: { streetName: streetName } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
       }
     });
   }
-  
+
   function show() {
-    models.Order.findOne({ include: [{
-      model: models.Address,
+    models.Order.findOne({
       include: [{
-        model: models.Street,
+        model: models.Address,
         include: [{
-          model: models.City,
-          attributes: ['cityName', 'postalCode']
+          model: models.Street,
+          include: [{
+            model: models.City,
+            attributes: ['cityName', 'postalCode']
+          }],
+          attributes: ['streetName']
         }],
-        attributes: ['streetName']
+        attributes: ['streetNumber', 'streetExtra']
       }],
-    attributes: ['streetNumber', 'streetExtra']
-  }], 
-  attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
-  where: {id: id} })
-    .catch(err => {
-      return next(err);
-     }).then(function(order) {
-      if(!order) {
-        return next(new Error("not found " + req.body.id));
-      } else {
-        req.receivedOrder = order;
-        return next();
-      }
-     });
+      attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
+      where: { id: id }
+    })
+      .catch(err => {
+        return next(err);
+      }).then(function (order) {
+        if (!order) {
+          return next(new Error("not found " + req.body.id));
+        } else {
+          req.receivedOrder = order;
+          return next();
+        }
+      });
   }
 
   doesCityExist(req.body.cityName).then(exists => {
-    if(exists) {
+    if (exists) {
       doesStreetExist(req.body.streetName).then(exists => {
-        if(exists) { //Existing street and city
-          models.Order.findOne({where: {id: id}}).catch(err => {
+        if (exists) { //Existing street and city
+          models.Order.findOne({ where: { id: id } }).catch(err => {
             return next(err);
-          }).then(function(order) {
-            models.Address.update({streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra},
-              {where: {id: order.AddressId}}).catch(err => {
-              return next(err);
-            }).then(() => {
-              show();
-            });
+          }).then(function (order) {
+            models.Address.update({ streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra },
+              { where: { id: order.AddressId } }).catch(err => {
+                return next(err);
+              }).then(() => {
+                show();
+              });
           });
         } else { //Existing city
           //UserAddress == Receiving address for the waffles, changes when order address gets changed
           orderStreet.save().catch(err => {
             return next(err);
           }).then(() => {
-            models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
+            models.City.findOne({ where: { cityName: req.body.cityName } }).catch(err => {
               return next(err);
-            }).then(function(city) {
+            }).then(function (city) {
               orderStreet.setCity(city).catch(err => {
                 return next(err);
               });
             }).then(() => {
-              models.Order.findOne({where: {id: id}}).catch(err => {
-                return next(err); 
-              }).then(function(order) {
-                models.Address.findOne({where: {id: order.AddressId}}).catch(err => {
+              models.Order.findOne({ where: { id: id } }).catch(err => {
+                return next(err);
+              }).then(function (order) {
+                models.Address.findOne({ where: { id: order.AddressId } }).catch(err => {
                   return next(err);
-                }).then(function(address) {
+                }).then(function (address) {
                   address.setStreet(orderStreet);
-                  models.Address.update({streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra}, 
-                    {where: {id: address.id}}).catch(err => {
+                  models.Address.update({ streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra },
+                    { where: { id: address.id } }).catch(err => {
                       return next(err);
                     }).then(() => {
                       show();
@@ -389,21 +403,21 @@ router.param("uOrderId", function(req, res, next, id) {
         return next(err);
       }).then(() => {
         orderStreet.save().catch(err => {
-          return next(err); 
+          return next(err);
         }).then(() => {
           orderStreet.setCity(orderCity).catch(err => {
             return next(err);
           });
         }).then(() => {
-          models.Order.findOne({where: {id: id}}).catch(err => {
+          models.Order.findOne({ where: { id: id } }).catch(err => {
             return next(err);
-          }).then(function(order) {
-            models.Address.findOne({where: {id: order.AddressId}}).catch(err => {
+          }).then(function (order) {
+            models.Address.findOne({ where: { id: order.AddressId } }).catch(err => {
               return next(err);
-            }).then(function(address) {
+            }).then(function (address) {
               address.setStreet(orderStreet);
-              models.Address.update({streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra},
-                {where: {id: address.id}}).catch(err => {
+              models.Address.update({ streetNumber: req.body.streetNumber, streetExtra: req.body.streetExtra },
+                { where: { id: address.id } }).catch(err => {
                   return next(err);
                 }).then(() => {
                   show();
@@ -414,45 +428,47 @@ router.param("uOrderId", function(req, res, next, id) {
       });
     }
   }).then(() => {
-    models.Order.update({ name: req.body.name, amountOfWaffles: req.body.amountOfWaffles, 
-      desiredOrderTime: req.body.desiredOrderTime, 
-      comment: req.body.comment}, {where: {id: id}})
+    models.Order.update({
+      name: req.body.name, amountOfWaffles: req.body.amountOfWaffles,
+      desiredOrderTime: req.body.desiredOrderTime,
+      comment: req.body.comment
+    }, { where: { id: id } })
       .catch(err => {
         return next(err);
       });
   });
 });
-router.patch("/patch/:uOrderId", auth, function(req, res, next) {
-    res.json(req.receivedOrder);
+router.patch("/patch/:uOrderId", auth, function (req, res, next) {
+  res.json(req.receivedOrder);
 });
 
-/* DELETE order */ 
-router.param("dOrderId", function(req, res, next, id) {
-  models.Order.findOne({where: {id:id}}).catch(err => {
+/* DELETE order */
+router.param("dOrderId", function (req, res, next, id) {
+  models.Order.findOne({ where: { id: id } }).catch(err => {
     return next(err);
-  }).then(function(order) {
-    models.Address.findOne({where: {id: order.AddressId}}).catch(err => {
+  }).then(function (order) {
+    models.Address.findOne({ where: { id: order.AddressId } }).catch(err => {
       return next(err);
-    }).then(function(address) {
+    }).then(function (address) {
       if (address.UserId == null) {
-        models.Address.destroy({where: {id: address.id}}).catch(err => {
+        models.Address.destroy({ where: { id: address.id } }).catch(err => {
           return next(err);
         });
       }
     });
   }).then(() => {
-    models.Order.destroy({where: {id: id}})
-    .catch(err => {
-      return next(err);
-    }).then(() => {
-      //TODO weergeven van order dat verwijderd werd of skip?
-      return next();
-    });
+    models.Order.destroy({ where: { id: id } })
+      .catch(err => {
+        return next(err);
+      }).then(() => {
+        //TODO weergeven van order dat verwijderd werd of skip?
+        return next();
+      });
   })
 });
 router.delete("/delete/:dOrderId", auth, function (req, res, next) {
-    res.json(true);
+  res.json(true);
 });
-  
+
 
 module.exports = router;

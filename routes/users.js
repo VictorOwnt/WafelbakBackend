@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const models  = require('../models');
+const models = require('../models');
 const passport = require('passport');
 const jwt = require('express-jwt');
 const zxcvbn = require("zxcvbn");
@@ -38,28 +38,30 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  */
-router.get("/", auth, function(req, res, next) {
+router.get("/", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
-  models.User.findAll({include: [{
-    model: models.Address,
+  models.User.findAll({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
-    }], 
-    attributes: ['streetNumber', 'streetExtra']
-  }],
-  attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
-  order: ['email'] }) 
-  .catch(err => {
-    return next(err);
-  }).then(function(users) {
-    res.json(users)
-  }); 
+      attributes: ['streetNumber', 'streetExtra']
+    }],
+    attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
+    order: ['email']
+  })
+    .catch(err => {
+      return next(err);
+    }).then(function (users) {
+      res.json(users)
+    });
 });
 
 /** GET users by id.
@@ -98,33 +100,35 @@ router.get("/", auth, function(req, res, next) {
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.param("userId", function(req, res, next, id) {
-  models.User.findOne({include: [{
-    model: models.Address,
+router.param("userId", function (req, res, next, id) {
+  models.User.findOne({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
-    }], 
-    attributes: ['streetNumber', 'streetExtra']
-  }],
-  attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
-  where: {id: id} })
-  .catch(err => {
-    return next(err);
-  }).then(function(user) {
-    if(!user) {
-      return next(new Error("not found " + id));
-    } else {
-      req.receivedUser = user;
-      return next();
-    }
-  });
+      attributes: ['streetNumber', 'streetExtra']
+    }],
+    attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
+    where: { id: id }
+  })
+    .catch(err => {
+      return next(err);
+    }).then(function (user) {
+      if (!user) {
+        return next(new Error("not found " + id));
+      } else {
+        req.receivedUser = user;
+        return next();
+      }
+    });
 });
-router.get("/id/:userId", auth, function(req, res, next) {
+router.get("/id/:userId", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
 
@@ -168,33 +172,35 @@ router.get("/id/:userId", auth, function(req, res, next) {
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.param("email", function(req, res, next, email) {
-  models.User.findOne({include: [{
-    model: models.Address,
+router.param("email", function (req, res, next, email) {
+  models.User.findOne({
     include: [{
-      model: models.Street,
+      model: models.Address,
       include: [{
-        model: models.City,
-        attributes: ['cityName', 'postalCode']
+        model: models.Street,
+        include: [{
+          model: models.City,
+          attributes: ['cityName', 'postalCode']
+        }],
+        attributes: ['streetName']
       }],
-      attributes: ['streetName']
-    }], 
-    attributes: ['streetNumber', 'streetExtra']
-  }],
-  attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
-  where: {email: email} })
-  .catch(err => {
-    return next(err);
-  }).then(function(user) {
-    if(!user) {
-      return next(new Error("No user found with email '" + email + "'."));
-    } else {
-      req.receivedUser = user;
-      return next();
-    }
+      attributes: ['streetNumber', 'streetExtra']
+    }],
+    attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
+    where: { email: email }
   })
+    .catch(err => {
+      return next(err);
+    }).then(function (user) {
+      if (!user) {
+        return next(new Error("No user found with email '" + email + "'."));
+      } else {
+        req.receivedUser = user;
+        return next();
+      }
+    })
 });
-router.get("/:email", auth, function(req, res, next) {
+router.get("/:email", auth, function (req, res, next) {
   res.json(req.receivedUser);
 });
 
@@ -235,24 +241,22 @@ router.get("/:email", auth, function(req, res, next) {
  *              schema: 
  *                  type: boolean
  */
-router.post("/isValidEmail", function(req, res, next) {
+router.post("/isValidEmail", function (req, res, next) {
   // Check if all fields are filled in
   if (!req.body.email)
     return res.status(400).json("Please fill out all fields.");
 
-  if (req.body.oldEmail)
-  {
-    if (req.body.email === req.body.oldEmail)
-    {
+  if (req.body.oldEmail) {
+    if (req.body.email === req.body.oldEmail) {
       res.send(true);
     }
-  } 
-  models.User.findOne({where: {email: req.body.email.trim().toLowerCase() }}).then(function(result) {
-      if (result !== null) {
-        res.send(false);
-      }  else
+  }
+  models.User.findOne({ where: { email: req.body.email.trim().toLowerCase() } }).then(function (result) {
+    if (result !== null) {
+      res.send(false);
+    } else
       res.send(validator.validate(req.body.email.trim().toLowerCase()));
-    });
+  });
 });
 
 /** POST Register User
@@ -324,7 +328,7 @@ router.post("/isValidEmail", function(req, res, next) {
  *                type: string
  *                description: This will contain an error message.
  */
-router.post("/register", function(req, res, next) {
+router.post("/register", function (req, res, next) {
   // Check if all required fields are filled in
   if (
     !req.body.firstName ||
@@ -332,8 +336,8 @@ router.post("/register", function(req, res, next) {
     !req.body.email ||
     !req.body.password ||
     !req.body.birthday ||
-    !req.body.streetName   ||           
-    !req.body.streetNumber  ||
+    !req.body.streetName ||
+    !req.body.streetNumber ||
     !req.body.cityName ||
     !req.body.postalCode
   )
@@ -341,7 +345,7 @@ router.post("/register", function(req, res, next) {
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
     return res.status(400).send("Wachtwoord is niet sterk genoeg.");
-  
+
   // Creating new User
   let user = models.User.build({
     firstName: req.body.firstName.trim(),
@@ -352,10 +356,10 @@ router.post("/register", function(req, res, next) {
   });
 
   function doesCityExist(cityName) {
-    return models.City.count({where: {cityName: cityName}}).catch(err => {
+    return models.City.count({ where: { cityName: cityName } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
@@ -370,17 +374,17 @@ router.post("/register", function(req, res, next) {
   });
 
   function doesStreetExist(streetName) {
-    return models.Street.count({where: {streetName: streetName}}).catch(err => {
+    return models.Street.count({ where: { streetName: streetName } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
       }
     });
   }
- 
+
   //Creating Street
   let userStreet = models.Street.build({
     streetName: req.body.streetName
@@ -395,33 +399,33 @@ router.post("/register", function(req, res, next) {
   //Saving the whole thing into database
   user.setPassword(req.body.password);
   doesCityExist(req.body.cityName).then(exists => {
-     if(exists) {
-       models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
-         return next(err);
-       }).then(function(city) {
-         userCity = city;
-       }).then(() => {
-         doesStreetExist(req.body.streetName).then(exists => {
-           if(exists) {
-             models.Street.findOne({where: {streetName: req.body.streetName}}).catch(err => {
-               return next(err);
-             }).then(function(street) {
-               userStreet = street;
-             }).then(() => {
-               userAddress.setStreet(userStreet);
-             }).then(() => {
-               user.save().catch(err => {
-                 return next(err);
-               }).then(() => {
-                 user.setAddress(userAddress).catch(err => {
-                   return next(err);
-                 });
-               }).then(() => {
-                 user.token = user.generateJWT();
-                 return res.json(user);
-               });
-             });
-           } else {
+    if (exists) {
+      models.City.findOne({ where: { cityName: req.body.cityName } }).catch(err => {
+        return next(err);
+      }).then(function (city) {
+        userCity = city;
+      }).then(() => {
+        doesStreetExist(req.body.streetName).then(exists => {
+          if (exists) {
+            models.Street.findOne({ where: { streetName: req.body.streetName } }).catch(err => {
+              return next(err);
+            }).then(function (street) {
+              userStreet = street;
+            }).then(() => {
+              userAddress.setStreet(userStreet);
+            }).then(() => {
+              user.save().catch(err => {
+                return next(err);
+              }).then(() => {
+                user.setAddress(userAddress).catch(err => {
+                  return next(err);
+                });
+              }).then(() => {
+                user.token = user.generateJWT();
+                return res.json(user);
+              });
+            });
+          } else {
             userStreet.save().catch(err => {
               return next(err);
             }).then(() => {
@@ -442,16 +446,16 @@ router.post("/register", function(req, res, next) {
                 return res.json(user);
               });
             });
-           }
-         });
-       });
-      } else { //als stad niet bestaat bestaat straat sws ook niet
+          }
+        });
+      });
+    } else { //als stad niet bestaat bestaat straat sws ook niet
       userCity.save().catch(err => {
         return next(err);
       }).then(() => {
         userStreet.save().catch(err => {
           return next(err);
-        }).then(() => { 
+        }).then(() => {
           userStreet.setCity(userCity).catch(err => {
             return next(err);
           });
@@ -474,7 +478,7 @@ router.post("/register", function(req, res, next) {
           });
         });
       });
-     }
+    }
   });
 });
 
@@ -524,14 +528,14 @@ router.post("/register", function(req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  */
-router.post("/registerMember", auth, function(req, res, next) {
+router.post("/registerMember", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
 
   // Check if all required fields are filled in
   if (
     !req.body.email ||
-    !req.body.password )
+    !req.body.password)
     return res.status(400).send("Gelieve alle velden in te vullen.");
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
@@ -596,14 +600,14 @@ router.post("/registerMember", auth, function(req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  */
-router.post("/registerAdmin", auth, function(req, res, next) {
+router.post("/registerAdmin", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
 
   // Check if all required fields are filled in
   if (
     !req.body.email ||
-    !req.body.password )
+    !req.body.password)
     return res.status(400).send("Gelieve alle velden in te vullen.");
   // Check if password is strong enough
   if (zxcvbn(req.body.password).score < 2)
@@ -622,12 +626,12 @@ router.post("/registerAdmin", auth, function(req, res, next) {
   });
 });
 
-router.post("/login", function(req, res, next) {
+router.post("/login", function (req, res, next) {
   // Check if all fields are filled in
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("Gelieve alle velden in te vullen.");
   }
-  passport.authenticate("local", function(err, user, info) {
+  passport.authenticate("local", function (err, user, info) {
     if (err) {
       return next(err);
     }
@@ -642,7 +646,7 @@ router.post("/login", function(req, res, next) {
 
 //TODO Aanpassen naar nieuw model
 /* UPDATE user */
-router.patch("/editProfile", auth, function(req, res, next) {
+router.patch("/editProfile", auth, function (req, res, next) {
   res.status(501).send("Kan nog geen gebruikers aanpassen.");
   /*if (
     !req.body.firstName ||

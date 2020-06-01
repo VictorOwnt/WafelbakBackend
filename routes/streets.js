@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const models  = require('../models');
+const models = require('../models');
 const jwt = require('express-jwt');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -37,23 +37,35 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.get("/", auth, function(req, res, next) {
-    // Check permissions
-    if (req.user.role != "admin" || req.user.role !='member') return res.status(401).end();
+router.get("/", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") {
+    if (req.user.role != "member") {
+      return res.status(401).end();
+    }
+  }
 
-    models.Street.findAll({ include: [{
+  models.Street.findAll({
+    include: [{
       model: models.City,
-    attributes: ['cityName', 'postalCode']
-  }, {
+      attributes: ['cityName', 'postalCode']
+    }, {
       model: models.Zone,
-    attributes: ['zoneName']
-  }], attributes: ['id', 'streetName']})
+      attributes: ['zoneName']
+    }], attributes: ['id', 'streetName']
+  })
     .catch(err => {
       return next(err);
-    }).then(function(streets) {
+    }).then(function (streets) {
       res.json(streets)
-    }); 
+    });
 });
 
 //TODO authenticatie voor admins/members?
@@ -65,7 +77,7 @@ router.get("/", auth, function(req, res, next) {
  *      description: |
  *        This should return a street by entering it's id if you are logged in as an either role. <br> <br>
  *        When you are not logged in, it should return a 401 error. <br> <br>
- *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *        When you enter an id of a street that doesn't exist, it should return a 400 error.
  *      parameters: 
  *        - in: path
  *          name: streetId
@@ -80,6 +92,12 @@ router.get("/", auth, function(req, res, next) {
  *            application/json: 
  *              schema: 
  *                $ref: '#/components/schemas/Street'
+ *        "400": 
+ *          description: Bad Request, street doesn't exist.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
@@ -87,35 +105,37 @@ router.get("/", auth, function(req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  *        "500": 
- *          description: Not found - Internal Server Error.
+ *          description: Server may be down - Internal Server Error.
  *          content:
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.param("streetId", function(req, res, next, id) {
-  models.Street.findOne({ include: [{
-    model: models.City,
-  attributes: ['cityName', 'postalCode']
-}, {
-    model: models.Zone,
-  attributes: ['zoneName']
-}], attributes: ['id', 'streetName'],
-where: {id: id} })
+router.param("streetId", function (req, res, next, id) {
+  models.Street.findOne({
+    include: [{
+      model: models.City,
+      attributes: ['cityName', 'postalCode']
+    }, {
+      model: models.Zone,
+      attributes: ['zoneName']
+    }], attributes: ['id', 'streetName'],
+    where: { id: id }
+  })
     .catch(err => {
       return next(err);
-    }).then(function(street) {
-      if(!street) {
-        return next(new Error("not found " + id));
+    }).then(function (street) {
+      if (!street) {
+        return res.status(400).json("Street with id: " + id + " not found.");
       } else {
         req.receivedStreet = street;
         return next();
       }
     });
-  });
-  router.get("/id/:streetId", auth, function(req, res, next) {
-    res.json(req.receivedStreet);
-  });
+});
+router.get("/id/:streetId", auth, function (req, res, next) {
+  res.json(req.receivedStreet);
+});
 
 //TODO authenticatie voor admins/members?
 /** GET street by name
@@ -126,7 +146,7 @@ where: {id: id} })
  *      description: |
  *        This should return a street by entering it's name if you are logged in as an either role. <br> <br>
  *        When you are not logged in, it should return a 401 error. <br> <br>
- *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *        When you enter a name of a street that doesn't exist, it should return a 400 error.
  *      parameters: 
  *        - in: path
  *          name: name
@@ -141,34 +161,49 @@ where: {id: id} })
  *            application/json: 
  *              schema: 
  *                $ref: '#/components/schemas/Street'
+ *        "400": 
+ *          description: Bad Request, street doens't exist.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.param("name", function(req, res, next, name) {
-  models.Street.findAll({ include: [{
-    model: models.City,
-  attributes: ['cityName', 'postalCode']
-}, {
-    model: models.Zone,
-  attributes: ['zoneName']
-}], attributes: ['id', 'streetName'],
-where: {streetName: {[Op.like]: '%' + name + '%'}}})
+router.param("name", function (req, res, next, name) {
+  // findAll omdat er meerder straten met dezelfde naam kunnen bestaan in verschillende steden
+  models.Street.findAll({
+    include: [{
+      model: models.City,
+      attributes: ['cityName', 'postalCode']
+    }, {
+      model: models.Zone,
+      attributes: ['zoneName']
+    }], attributes: ['id', 'streetName'],
+    where: { streetName: { [Op.like]: '%' + name + '%' } }
+  })
     .catch(err => {
       return next(err);
-    }).then(function(streets) {
-      if(!streets) {
-        return next(new Error("No streets found with name" + name + "."));
+    }).then(function (streets) {
+      if (streets.length == 0) {
+        return res.status(400).json("Street with name: " + name + " not found.");
       } else {
         req.receivedStreets = streets;
         return next();
       }
     });
 });
-router.get("/byName/:name", auth, function(req, res, next) {
+router.get("/byName/:name", auth, function (req, res, next) {
   res.json(req.receivedStreets);
 });
 
@@ -182,7 +217,7 @@ router.get("/byName/:name", auth, function(req, res, next) {
  *      description: |
  *        This should return all streets in city by entering the city name if you are logged in as an either role. <br> <br>
  *        When you are not logged in, it should return a 401 error. <br> <br>
- *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *        When you enter the name of a city that doesn't exist, it should return a 400 error.
  *      parameters: 
  *        - in: path
  *          name: cityName
@@ -199,35 +234,49 @@ router.get("/byName/:name", auth, function(req, res, next) {
  *                type: array
  *                items:
  *                  $ref: '#/components/schemas/Street'
+ *        "400": 
+ *          description: Bad Request, city doesn't exist or doesn't contain streets.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.param("cityName", function(req, res, next, cityName) {
-  models.Street.findAll({ include: [{
-    model: models.City,
-  attributes: ['cityName', 'postalCode'],
-  where: {cityName: cityName}
-}, {
-    model: models.Zone,
-  attributes: ['zoneName']
-}], attributes: ['id', 'streetName']})
+router.param("cityName", function (req, res, next, cityName) {
+  models.Street.findAll({
+    include: [{
+      model: models.City,
+      attributes: ['cityName', 'postalCode'],
+      where: { cityName: cityName }
+    }, {
+      model: models.Zone,
+      attributes: ['zoneName']
+    }], attributes: ['id', 'streetName']
+  })
     .catch(err => {
       return next(err);
-    }).then(function(streets) {
-      if(!streets) {
-        return next(new Error("No streets found in city:" + cityName + "."));
+    }).then(function (streets) {
+      if (streets.length == 0) {
+        return res.status(400).json("City with name: " + cityName + " doesn't exist or contains no streets.");
       } else {
         req.receivedStreets = streets;
         return next();
       }
     });
 });
-router.get("/byCity/:cityName", auth, function(req, res, next) {  
-    res.json(req.receivedStreets);
+router.get("/byCity/:cityName", auth, function (req, res, next) {
+  res.json(req.receivedStreets);
 });
 
 //TODO  eventule verplaatsing naar zones routes?
@@ -239,7 +288,7 @@ router.get("/byCity/:cityName", auth, function(req, res, next) {
  *      description: |
  *        This should return all streets in a zone by entering the zone name if you are logged in as an admin. <br> <br>
  *        When you are not logged in as an admin, it should return a 401 error. <br> <br>
- *        When you enter an id of a street that doesn't exist, it should return a 500 error.
+ *        When you enter an name of a zone that doesn't exist, it should return a 400 error.
  *      parameters: 
  *        - in: path
  *          name: zoneName
@@ -256,40 +305,53 @@ router.get("/byCity/:cityName", auth, function(req, res, next) {
  *                type: array
  *                items:
  *                  $ref: '#/components/schemas/Street'
+ *        "400": 
+ *          description: Bad Request, zone doesn't exist or contains no streets.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-router.param("zoneName", function(req, res, next, zoneName) {
-  models.Street.findAll({ include: [{
-    model: models.City,
-  attributes: ['cityName', 'postalCode']
-}, {
-    model: models.Zone,
-  attributes: ['zoneName'],
-  where: {zoneName: zoneName}
-}], attributes: ['id', 'streetName']})
+router.param("zoneName", function (req, res, next, zoneName) {
+  models.Street.findAll({
+    include: [{
+      model: models.City,
+      attributes: ['cityName', 'postalCode']
+    }, {
+      model: models.Zone,
+      attributes: ['zoneName'],
+      where: { zoneName: zoneName }
+    }], attributes: ['id', 'streetName']
+  })
     .catch(err => {
       return next(err);
-    }).then(function(streets) {
-      if(!streets) {
-        return next(new Error("No streets found in zone:" + zoneName + "."));
+    }).then(function (streets) {
+      if (streets.length == 0) {
+        return res.status(400).json("Zone with name: " + zoneName + " doesn't exist or contains no streets.");
       } else {
         req.receivedStreets = streets;
         return next();
       }
     });
 });
-router.get("/byZone/:zoneName", auth, function(req, res, next) {  
-    // Check permissions
-    if (req.user.role != "admin") return res.status(401).end();
-
-    res.json(req.receivedStreets);
+router.get("/byZone/:zoneName", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
+  res.json(req.receivedStreets);
 });
- 
+
 /** POST Create Street
  * @swagger
  * /API/streets/create:
@@ -334,6 +396,12 @@ router.get("/byZone/:zoneName", auth, function(req, res, next) {
  *                    CityId: 
  *                      type: integer
  *                      description: The id of the city the newly created street is linked to.
+ *        "400": 
+ *          description: Bad Reqeust, required fields are not filled out.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
@@ -341,34 +409,38 @@ router.get("/byZone/:zoneName", auth, function(req, res, next) {
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  *        "500": 
- *          description: Street does already exist - Internal Sever Error.
+ *          description: Server may be down - Internal Sever Error.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
  */
-router.post("/create", auth, function(req, res, next) {
+router.post("/create", auth, function (req, res, next) {
   // Check permissions
-  if (req.user.role != "admin" || req.user.role !='member') return res.status(401).end();
+  if (req.user.role != "admin") {
+    if (req.user.role != "member") {
+      return res.status(401).end();
+    }
+  }
 
   // Check if all required fields are filled in
   if (
     !req.body.streetName ||
     !req.body.cityName ||
-    !req.body.postalCode )
-    return res.status(400).send("Gelieve alle noodzakelijke velden in te vullen.");
+    !req.body.postalCode)
+    return res.status(400).json("Please fill out all necessary fields.");
 
-   //Creating City
-   let city = models.City.build({
+  //Creating City
+  let city = models.City.build({
     cityName: req.body.cityName,
     postalCode: req.body.postalCode
   });
 
   function doesCityExist(cityName, postalCode) {
-    return models.City.count({where: {cityName: cityName, postalCode: postalCode}}).catch(err => {
+    return models.City.count({ where: { cityName: cityName, postalCode: postalCode } }).catch(err => {
       return next(err);
     }).then(count => {
-      if(count == 0) {
+      if (count == 0) {
         return false
       } else {
         return true
@@ -383,13 +455,13 @@ router.post("/create", auth, function(req, res, next) {
 
   //check op postcode hoeft niet persé
   doesCityExist(req.body.cityName, req.body.postalCode).then(exists => {
-    if(exists) {
+    if (exists) {
       street.save().catch(err => {
         return next(err);
       }).then(() => {
-        models.City.findOne({where: {cityName: req.body.cityName}}).catch(err => {
+        models.City.findOne({ where: { cityName: req.body.cityName } }).catch(err => {
           return next(err);
-        }).then(function(city) {
+        }).then(function (city) {
           street.setCity(city);
         }).then(() => {
           return res.json(street);
@@ -449,46 +521,137 @@ router.post("/create", auth, function(req, res, next) {
  *                type: array
  *                items:
  *                  $ref: '#/components/schemas/Street'
+ *        "400": 
+ *          description: Bad Request, zone doesn't exist.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  *        "401": 
  *          description: Unauthorized access.
  *          content: 
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  */
-router.patch("/setZone", auth, function(req, res, next) {
+router.patch("/setZone", auth, function (req, res, next) {
   // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
 
-  models.Zone.findOne({where: {zoneName: req.body.zoneName}}).catch(err => {
+  models.Zone.findOne({ where: { zoneName: req.body.zoneName } }).catch(err => {
     return next(err);
-  }).then(function(zone){
-    models.Street.update({ZoneId: zone.id}, {where: {streetName: req.body.streetNames}}).catch(err => {
-      return next(err);
-    }).then(() => {
-      models.Street.findAll({ include: [{
-        model: models.City,
-      attributes: ['cityName', 'postalCode']
-    }, {
-        model: models.Zone,
-      attributes: ['zoneName']
-    }], attributes: ['id', 'streetName'],
-    where: {streetName: req.body.streetNames}}).catch(err => {
-      return next(err);
-    }).then(function(streets) {
-      if(!streets) {
-        return next(new Error("No streets found with name" + name + "."));
-      } else {
-        res.json(streets);
-      }
+  }).then(function (zone) {
+    if (!zone) {
+      return res.status(400).json("No zone found with nam " + req.body.zoneName + ".");
+    } else {
+      models.Street.update({ ZoneId: zone.id }, { where: { streetName: req.body.streetNames } }).catch(err => {
+        return next(err);
+      }).then(() => {
+        models.Street.findAll({
+          include: [{
+            model: models.City,
+            attributes: ['cityName', 'postalCode']
+          }, {
+            model: models.Zone,
+            attributes: ['zoneName']
+          }], attributes: ['id', 'streetName'],
+          where: { streetName: req.body.streetNames }
+        }).catch(err => {
+          return next(err);
+        }).then(function (streets) {
+          res.json(streets);
+        });
       });
-    });
+    }
   });
 });
 
-//TODO is een update street nodig?
+/** PATCH update street
+ * @swagger
+ * /API/streets/updateStreet:
+ *    patch:
+ *      tags: [Streets]
+ *      description: |
+ *        This request is used for updating a street. <br> <br>
+ *        If the street doesn't exist, an error 500 will be thrown. <br> <br>
+ *        When you are not logged in as an admin, it should return a 401 error.
+ *      requestBody: 
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: 
+ *                - id
+ *                - streetName
+ *              properties:
+ *                id: 
+ *                  type: integer
+ *                  description: The id of the street that needs to be updated.
+ *                streetName:
+ *                  type: string
+ *                  description: The name of the street that needs to be updated.
+ *      responses: 
+ *        "200":
+ *          description: The updated street.
+ *          content: 
+ *            application/json: 
+ *              schema: 
+ *                type: object
+ *                properties:
+ *                  id: 
+ *                    type: integer
+ *                    description: The id of the street that has been updated.
+ *                  streetName:
+ *                    type: string
+ *                    description: The name of the street that has been updated.
+ *        "400": 
+ *          description: Street can't be updatet because there already exists one with that name.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: string
+ *                description: This will contain an error message.
+ *        "401": 
+ *          description: Unauthorized access.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
+ */
+router.patch("/updateStreet", auth, function (req, res, next) {
+  // Check permissions
+  if (req.user.role != "admin") return res.status(401).end();
 
- //misschien deze weghalen, is gevaarlijk, kan gans systeem omzeep helpen
+  models.Street.findOne({ where: { streetName: req.body.streetName } }).then(function (result) {
+    if (result !== null) {
+      res.status(400).json("There does already exist a street with that name.")
+    } else {
+      models.Street.update({ streetName: req.body.streetName }, { where: { id: req.body.id } }).catch(err => {
+        return next(err);
+      }).then(() => {
+        models.Street.findOne({ attributes: ['id', 'streetName'], where: { id: req.body.id } }).catch(err => {
+          return next(err);
+        }).then(function (zone) {
+          return res.json(zone)
+        });
+      });
+    }
+  })
+});
+
+//misschien deze weghalen, is gevaarlijk, kan gans systeem omzeep helpen
 //TODO superadmin (aka ik kan dit enekel aanhalen)
 /** DELETE Delete Street
  * @swagger
@@ -520,20 +683,27 @@ router.patch("/setZone", auth, function(req, res, next) {
  *            application/json:
  *              schema: 
  *                $ref: '#/components/schemas/Error'
+ *        "500": 
+ *          description: Server may be down - Internal Server Error.
+ *          content: 
+ *            application/json:
+ *              schema: 
+ *                $ref: '#/components/schemas/Error'
  */
-router.param("dStreetId", function(req, res, next, id) {
-  models.Street.destroy({where: {id: id}})
-  .catch(err => {
-    return next(err);
-  }).then(() => {
-    //TODO weergeven van straat die verwijderd werd of skip?
+router.param("dStreetId", function (req, res, next, id) {
+  models.Street.destroy({ where: { id: id } })
+    .catch(err => {
+      return next(err);
+    }).then(() => {
+      //TODO weergeven van straat die verwijderd werd of skip?
       return next();
     });
 });
 router.delete("/delete/:dStreetId", auth, function (req, res, next) {
+  // Check permissions
   if (req.user.role != "admin") return res.status(401).end();
-    res.json(true);
+  res.json(true);
 });
-  
+
 
 module.exports = router;

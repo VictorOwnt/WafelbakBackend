@@ -9,77 +9,77 @@ var passport = require('passport');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 let options = {
-    swaggerDefinition: {
-      openapi: "3.0.1",
-      info: {
-        title: 'Wafelbak API', // Title (required)
-        version: '1.0.0', // Version (required)
-        description: 'The offical documentation of the Wafelbak API.',
+  swaggerDefinition: {
+    openapi: "3.0.1",
+    info: {
+      title: 'Wafelbak API', // Title (required)
+      version: '1.1.0', // Version (required)
+      description: 'The offical documentation of the Wafelbak API.',
+    },
+    servers: [
+      {
+        url: "https://wafelbak-api-p4tlzt4yxq-ew.a.run.app",
+        description: "Production server"
       },
-      servers: [
-        {
-          url: "https://wafelbak-api-p4tlzt4yxq-ew.a.run.app",
-          description: "Production server"
-        },
-        {
-          url: "http://localhost:3000",
-          description: "Development server"
+      {
+        url: "http://localhost:3000",
+        description: "Development server"
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
         }
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          }
-        },
-        schemas: {
-          Error: {
-            type: 'object',
-            properties: {
-              error: {
-                type: 'object',
-                properties: {
-                  name: {
-                    type: 'string',
-                    description: 'The name of the error.'
-                  },
-                  message: {
-                    type: 'string', 
-                    description: 'The message of the error.'
-                  },
-                  code: {
-                    type: 'string',
-                    description: 'The code of the error.'
-                  },
-                  status: {
-                    type: 'integer',
-                    description: 'The status of the error.'
-                  }, 
-                  inner: {
-                    type: 'object',
-                    properties: {
-                      message: {
-                        type: 'string',
-                        description: 'Inner message of the error.'
-                      }
+      },
+      schemas: {
+        Error: {
+          type: 'object',
+          properties: {
+            error: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  description: 'The name of the error.'
+                },
+                message: {
+                  type: 'string',
+                  description: 'The message of the error.'
+                },
+                code: {
+                  type: 'string',
+                  description: 'The code of the error.'
+                },
+                status: {
+                  type: 'integer',
+                  description: 'The status of the error.'
+                },
+                inner: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      description: 'Inner message of the error.'
                     }
                   }
                 }
               }
             }
           }
-        },
-      },
-      security: [
-        {
-          bearerAuth: []
         }
-      ],
+      },
     },
-    // Path to the API docs
-    apis: ['./routes/*.js', './models/*.js'],
+    security: [
+      {
+        bearerAuth: []
+      }
+    ],
+  },
+  // Path to the API docs
+  apis: ['./routes/*.js', './models/*.js'],
 };
 const swaggerSpec = swaggerJSDoc(options);
 
@@ -122,12 +122,12 @@ app.use('/API/streets', streetsRouter);
 app.use('/API/zones', zonesRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
