@@ -8,6 +8,9 @@
  *                  - streetName
  *                  - City
  *              properties:
+ *                  id:
+ *                      type: integer
+ *                      description: The id of the street.
  *                  streetName: 
  *                      type: string
  *                      description: The name of the street.

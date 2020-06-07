@@ -54,11 +54,11 @@ router.get("/", auth, function (req, res, next) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
     order: ['email']
@@ -120,11 +120,11 @@ router.param("userId", function (req, res, next, id) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
     where: { id: id }
@@ -198,11 +198,11 @@ router.param("email", function (req, res, next, email) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'firstName', 'lastName', 'email', 'birthday', 'role'],
     where: { email: email }
@@ -349,7 +349,37 @@ router.post("/isValidEmail", function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                  $ref: '#/components/schemas/User'
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    description: The id of the newly registered user.
+ *                  firstName:
+ *                    type: string
+ *                    description: The first name of the newly registered user.
+ *                  lastName:
+ *                    type: string
+ *                    description: The last name of the newly registered user.
+ *                  email:
+ *                    type: string
+ *                    format: email
+ *                    description: The email of the newly registered user.
+ *                  role: 
+ *                    type: string
+ *                    description: The role of the newly registered user.
+ *                  birthday:
+ *                    type: string
+ *                    format: date-time
+ *                    description: The birthday of the newly registered user.
+ *                  salt:
+ *                    type: string
+ *                    description: The salt that was used for encrypting the password of the newly registered user.
+ *                  hash:
+ *                    type: string
+ *                    description: The encrypted password hash from the newly registered user.
+ *                  token:
+ *                    type: string
+ *                    description: Bearer token, used for authorization.
  *        "400": 
  *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
@@ -549,7 +579,27 @@ router.post("/register", function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                  $ref: '#/components/schemas/User'
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    description: The id of the newly registered user.
+ *                  email:
+ *                    type: string
+ *                    format: email
+ *                    description: The email of the newly registered user.
+ *                  role: 
+ *                    type: string
+ *                    description: The role of the newly registered user.
+ *                  salt:
+ *                    type: string
+ *                    description: The salt that was used for encrypting the password of the newly registered user.
+ *                  hash:
+ *                    type: string
+ *                    description: The encrypted password hash from the newly registered user.
+ *                  token:
+ *                    type: string
+ *                    description: Bearer token, used for authorization.        
  *        "400": 
  *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
@@ -627,7 +677,27 @@ router.post("/registerMember", auth, function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                  $ref: '#/components/schemas/User'
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    description: The id of the newly registered user.
+ *                  email:
+ *                    type: string
+ *                    format: email
+ *                    description: The email of the newly registered user.
+ *                  role: 
+ *                    type: string
+ *                    description: The role of the newly registered user.
+ *                  salt:
+ *                    type: string
+ *                    description: The salt that was used for encrypting the password of the newly registered user.
+ *                  hash:
+ *                    type: string
+ *                    description: The encrypted password hash from the newly registered user.
+ *                  token:
+ *                    type: string
+ *                    description: Bearer token, used for authorization. 
  *        "400": 
  *          description: Bad Request, Password not strong enough or fields not filled out.
  *          content:
@@ -706,7 +776,37 @@ router.post("/registerAdmin", auth, function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                $ref: '#/components/schemas/User'
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    description: The id of the newly registered user.
+ *                  firstName:
+ *                    type: string
+ *                    description: The first name of the newly registered user.
+ *                  lastName:
+ *                    type: string
+ *                    description: The last name of the newly registered user.
+ *                  email:
+ *                    type: string
+ *                    format: email
+ *                    description: The email of the newly registered user.
+ *                  role: 
+ *                    type: string
+ *                    description: The role of the newly registered user.
+ *                  birthday:
+ *                    type: string
+ *                    format: date-time
+ *                    description: The birthday of the newly registered user.
+ *                  salt:
+ *                    type: string
+ *                    description: The salt that was used for encrypting the password of the newly registered user.
+ *                  hash:
+ *                    type: string
+ *                    description: The encrypted password hash from the newly registered user.
+ *                  token:
+ *                    type: string
+ *                    description: Bearer token, used for authorization.
  *        "400": 
  *          description: Bad Request, fields not filled out.
  *          content:

@@ -55,10 +55,10 @@ router.get("/", auth, function (req, res, next) {
   models.Street.findAll({
     include: [{
       model: models.City,
-      attributes: ['cityName', 'postalCode']
+      attributes: ['id', 'cityName', 'postalCode']
     }, {
       model: models.Zone,
-      attributes: ['zoneName']
+      attributes: ['id', 'zoneName']
     }], attributes: ['id', 'streetName']
   })
     .catch(err => {
@@ -115,10 +115,10 @@ router.param("streetId", function (req, res, next, id) {
   models.Street.findOne({
     include: [{
       model: models.City,
-      attributes: ['cityName', 'postalCode']
+      attributes: ['id', 'cityName', 'postalCode']
     }, {
       model: models.Zone,
-      attributes: ['zoneName']
+      attributes: ['id', 'zoneName']
     }], attributes: ['id', 'streetName'],
     where: { id: id }
   })
@@ -187,10 +187,10 @@ router.param("name", function (req, res, next, name) {
   models.Street.findAll({
     include: [{
       model: models.City,
-      attributes: ['cityName', 'postalCode']
+      attributes: ['id', 'cityName', 'postalCode']
     }, {
       model: models.Zone,
-      attributes: ['zoneName']
+      attributes: ['id', 'zoneName']
     }], attributes: ['id', 'streetName'],
     where: { streetName: { [Op.like]: '%' + name + '%' } }
   })
@@ -259,11 +259,11 @@ router.param("cityName", function (req, res, next, cityName) {
   models.Street.findAll({
     include: [{
       model: models.City,
-      attributes: ['cityName', 'postalCode'],
+      attributes: ['id', 'cityName', 'postalCode'],
       where: { cityName: cityName }
     }, {
       model: models.Zone,
-      attributes: ['zoneName']
+      attributes: ['id', 'zoneName']
     }], attributes: ['id', 'streetName']
   })
     .catch(err => {
@@ -330,10 +330,10 @@ router.param("zoneName", function (req, res, next, zoneName) {
   models.Street.findAll({
     include: [{
       model: models.City,
-      attributes: ['cityName', 'postalCode']
+      attributes: ['id', 'cityName', 'postalCode']
     }, {
       model: models.Zone,
-      attributes: ['zoneName'],
+      attributes: ['id', 'zoneName'],
       where: { zoneName: zoneName }
     }], attributes: ['id', 'streetName']
   })
@@ -558,10 +558,10 @@ router.patch("/setZone", auth, function (req, res, next) {
         models.Street.findAll({
           include: [{
             model: models.City,
-            attributes: ['cityName', 'postalCode']
+            attributes: ['id', 'cityName', 'postalCode']
           }, {
             model: models.Zone,
-            attributes: ['zoneName']
+            attributes: ['id', 'zoneName']
           }], attributes: ['id', 'streetName'],
           where: { streetName: req.body.streetNames }
         }).catch(err => {
@@ -612,6 +612,9 @@ router.patch("/setZone", auth, function (req, res, next) {
  *                  streetName:
  *                    type: string
  *                    description: The name of the street that has been updated.
+ *                  CityId:
+ *                    type: integer
+ *                    description: The id of city that the updated street is part of.
  *        "400": 
  *          description: Bad Request, Street can't be updatet because there already exists one with that name.
  *          content:
@@ -643,7 +646,7 @@ router.patch("/updateStreet", auth, function (req, res, next) {
       models.Street.update({ streetName: req.body.streetName }, { where: { id: req.body.id } }).catch(err => {
         return next(err);
       }).then(() => {
-        models.Street.findOne({ attributes: ['id', 'streetName'], where: { id: req.body.id } }).catch(err => {
+        models.Street.findOne({ attributes: ['id', 'streetName', 'CityId'], where: { id: req.body.id } }).catch(err => {
           return next(err);
         }).then(function (zone) {
           return res.json(zone)

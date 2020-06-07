@@ -1,37 +1,42 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const basename  = path.basename(__filename);
+const basename = path.basename(__filename);
 const db = {};
+
+// SSL certificates for development only, cut out when you want to create prodcution
+const cKey = fs.readFileSync('../SSL-Certificates/client-key.pem');
+const cCert = fs.readFileSync('../SSL-Certificates/client-cert.pem');
+const cCA = fs.readFileSync('../SSL-Certificates/server-ca.pem');
 
 //switch uncommented/commented for envrionment switch
 var sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
-  host: `/cloudsql/${process.env.DATABASE_SERVER}`, //process.env.DATABASE_SERVER 
+  host: process.env.DATABASE_SERVER, // `/cloudsql/${process.env.DATABASE_SERVER}`
   // port should be in comments for production
-  // port: '3306',
+  port: '3306',
   dialect: process.env.DATABASE_DIALECT,
   dialectOptions: {
     // ssl should be in comments for production
-    socketPath: `/cloudsql/${process.env.DATABASE_SERVER}`
-    /* ssl: {
+    // socketPath: `/cloudsql/${process.env.DATABASE_SERVER}`
+    ssl: {
       key: cKey,
       cert: cCert,
       ca: cCA,
-    }*/
+    }
   }
 });
 
 // Models
 fs.readdirSync(__dirname).filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-  })
+  return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
+})
   .forEach(file => {
     var model = sequelize['import'](path.join(__dirname, file));
     db[model.name] = model;
   });
 
 
-Object.keys(db).forEach(function(modelName) {
+Object.keys(db).forEach(function (modelName) {
   if ("associate" in db[modelName]) {
     db[modelName].associate(db);
   }

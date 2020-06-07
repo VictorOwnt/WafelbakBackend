@@ -8,6 +8,9 @@
  *                  - streetNumber
  *                  - Street
  *              properties:
+ *                  id:
+ *                      type: integer
+ *                      description: The id of the address.
  *                  streetNumber: 
  *                      type: integer
  *                      description: The street number of the address.

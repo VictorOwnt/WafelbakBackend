@@ -15,7 +15,7 @@ const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
  */
 
 //TODO enkel orders voor bepaald jaar?
-/** GET orderslisting.
+/** GET orders listing.
  * @swagger
  * /API/orders:
  *    get:
@@ -55,11 +55,11 @@ router.get("/", auth, function (req, res, next) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }], attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment']
   })
     .catch(err => {
@@ -120,11 +120,11 @@ router.param("orderId", function (req, res, next, id) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
     where: { id: id }
@@ -199,11 +199,11 @@ router.param("status", function (req, res, next, status) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
     where: { status: status }
@@ -279,11 +279,11 @@ router.param("name", function (req, res, next, name) {
         model: models.Street,
         include: [{
           model: models.City,
-          attributes: ['cityName', 'postalCode']
+          attributes: ['id', 'cityName', 'postalCode']
         }],
-        attributes: ['streetName']
+        attributes: ['id', 'streetName']
       }],
-      attributes: ['streetNumber', 'streetExtra']
+      attributes: ['id', 'streetNumber', 'streetExtra']
     }],
     attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
     where: { name: { [Op.like]: '%' + name + '%' } }
@@ -367,7 +367,36 @@ router.get("/byName/:name", auth, function (req, res, next) {
  *          content: 
  *            application/json: 
  *              schema: 
- *                $ref: '#/components/schemas/Order'
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    description: The id of the newly created order.
+ *                  name:
+ *                    type: string
+ *                    description: The name of (the user) who the newly created order is for.
+ *                  amountOfWaffles:
+ *                    type: string
+ *                    enum: 
+ *                      - "2"
+ *                      - "4"
+ *                      - "8"
+ *                      - "20"
+ *                    description: The amount of waffles in the newly created order.
+ *                  desiredOrderTime: 
+ *                    type: string
+ *                    enum:
+ *                      - "9u-12u"
+ *                      - "13u-16u"
+ *                      - "16u-18u"
+ *                      - "Om het even"
+ *                    description: The timeframe in which the newly created order needs to be delivered.
+ *                  comment:
+ *                    type: string
+ *                    description: Additional comment that comes with the newly created order.
+ *                  AddressId:
+ *                    type: integer
+ *                    description: The id of the address the newly created order is linked to.
  *        "400": 
  *          description: Bad Request, required fields are not filled out.
  *          content: 
@@ -539,11 +568,11 @@ router.param("cOrderId", function (req, res, next, id) {
                 model: models.Street,
                 include: [{
                   model: models.City,
-                  attributes: ['cityName', 'postalCode']
+                  attributes: ['id', 'cityName', 'postalCode']
                 }],
-                attributes: ['streetName']
+                attributes: ['id', 'streetName']
               }],
-              attributes: ['streetNumber', 'streetExtra']
+              attributes: ['id', 'streetNumber', 'streetExtra']
             }],
             attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
             where: { id: id }
@@ -705,11 +734,11 @@ router.param("uOrderId", function (req, res, next, id) {
           model: models.Street,
           include: [{
             model: models.City,
-            attributes: ['cityName', 'postalCode']
+            attributes: ['id', 'cityName', 'postalCode']
           }],
-          attributes: ['streetName']
+          attributes: ['id', 'streetName']
         }],
-        attributes: ['streetNumber', 'streetExtra']
+        attributes: ['id', 'streetNumber', 'streetExtra']
       }],
       attributes: ['id', 'name', 'amountOfWaffles', 'desiredOrderTime', 'status', 'comment'],
       where: { id: id }

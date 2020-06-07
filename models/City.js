@@ -8,6 +8,9 @@
  *                  - cityName
  *                  - postalCode
  *              properties:
+ *                  id:
+ *                      type: integer
+ *                      description: The id of the city.
  *                  cityName: 
  *                      type: string
  *                      description: The name of the city.
