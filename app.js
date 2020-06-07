@@ -13,7 +13,7 @@ let options = {
     openapi: "3.0.1",
     info: {
       title: 'Wafelbak API', // Title (required)
-      version: '1.1.0', // Version (required)
+      version: '1.1.1', // Version (required)
       description: 'The offical documentation of the Wafelbak API.',
     },
     servers: [
