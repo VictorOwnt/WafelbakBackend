@@ -5,7 +5,7 @@ const jwt = require('express-jwt');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET, algorithms: ['RS512'] });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET, algorithms: ['HS256'] });
 /**
  * @swagger
  * tags:
