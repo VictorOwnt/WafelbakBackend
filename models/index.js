@@ -6,7 +6,7 @@ const db = {};
 
 //switch uncommented/commented for envrionment switch
 var sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
-  host: `/cloudsql/${process.env.DATABASE_SERVER}`, // process.env.DATABASE_SERVER
+  host: `/cloudsql/${process.env.DATABASE_SERVER}`, // process.env.DATABASE_SERVER 
   // port should be in comments for production
   // port: '3306',
   dialect: process.env.DATABASE_DIALECT,
