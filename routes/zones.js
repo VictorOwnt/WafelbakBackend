@@ -3,7 +3,7 @@ const router = express.Router();
 const models = require('../models');
 const jwt = require('express-jwt');
 
-const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET, algorithms: ['RS512'] });
 /**
  * @swagger
  * tags:

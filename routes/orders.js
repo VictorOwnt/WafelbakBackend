@@ -6,7 +6,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 
-const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET });
+const auth = jwt({ secret: process.env.WAFELBAK_API_SECRET, algorithms: ['RS512'] });
 /**
  * @swagger
  * tags:
