@@ -24,7 +24,7 @@
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "email-validator": "^2.0.4",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-jwt": "^6.0.0",
     "express-sequelize": "0.0.4",
     "http-errors": "^1.7.3",
